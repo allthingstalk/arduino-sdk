@@ -41,37 +41,37 @@ ATTDevice::ATTDevice(String deviceId, String clientId, String clientKey): _clien
 	_clientKey = clientKey;
 }
 
-//connect with the http server
+// connect with the http server
 bool ATTDevice::Connect(Client* httpClient, char httpServer[])
 {
 	_client = httpClient;
-	_serverName = httpServer;					//keep track of this value while working with the http server.
+	_serverName = httpServer;  // keep track of this value while working with the http server
 	
 	#ifdef DEBUG
 	Serial.print("Connecting to ");
     Serial.println(httpServer);
 	#endif
 
-	if (!_client->connect(httpServer, 80)) 		// if you get a connection, report back via serial:
+	if (!_client->connect(httpServer, 80))  // if you get a connection, report back via serial:
 	{
 		#ifdef DEBUG
 		Serial.print(HTTPSERVTEXT);
 		Serial.println(FAILED_RETRY);
 		#endif
-		return false;									//we have created a connection succesfully.
+		return false;  // we have created a connection succesfully
 	}
 	else{
 		#ifdef DEBUG
 		Serial.print(HTTPSERVTEXT);
 		Serial.println(SUCCESTXT);
 		#endif
-		delay(ETHERNETDELAY);							// another small delay: sometimes the card is not yet ready to send the asset info.
-		return true;									//we have created a connection succesfully.
+		delay(ETHERNETDELAY);  // another small delay: sometimes the card is not yet ready to send the asset info.
+		return true;           // we have created a connection succesfully
 	}
 }
 
-//closes any open connections (http & mqtt) and resets the device. After this call, you 
-//can call connect and/or subscribe again. Credentials remain stored.
+// closes any open connections (http & mqtt) and resets the device. After this call,
+// you can call connect and/or subscribe again. Credentials remain stored
 void ATTDevice::Close()
 {
 	CloseHTTP();
@@ -83,7 +83,7 @@ void ATTDevice::Close()
 	}
 }
 
-//closes the http connection, if any.
+// closes the http connection, if any
 void ATTDevice::CloseHTTP()
 {
 	if(_client){
@@ -96,10 +96,10 @@ void ATTDevice::CloseHTTP()
 	}
 }
 
-//create or update the specified asset.
-void ATTDevice::AddAsset(int id, String name, String description, bool isActuator, String type)
+// create or update the specified asset.
+void ATTDevice::AddAsset(int id, String name, String description, String assetType, String dataType)
 {
-    // Make a HTTP request:
+  // Make a HTTP request:
 	{
 		String idStr(id);
 		_client->println("PUT /device/" + _deviceId + "/asset/" + idStr  + " HTTP/1.1");
@@ -110,17 +110,22 @@ void ATTDevice::AddAsset(int id, String name, String description, bool isActuato
     _client->print(F("Auth-ClientKey: "));_client->println(_clientKey);
     _client->print(F("Auth-ClientId: "));_client->println(_clientId); 
 	
-	int typeLength = type.length();
+	int typeLength = dataType.length();
 	_client->print(F("Content-Length: "));
 	{																					//make every mem op local, so it is unloaded asap
 		int length = name.length() + description.length() + typeLength;
-		if(isActuator) 
-			length += 8;
-		else 
+		if(assetType.equals("sensor"))
 			length += 6;
+		else if(assetType.equals("actuator"))
+			length += 8;
+ 		else if(assetType.equals("virtual"))
+      length += 7;
+   	else if(assetType.equals("config"))
+			length += 6;
+    
 		if (typeLength == 0)
 			length += 39;
-		else if(type[0] == '{')
+		else if(dataType[0] == '{')
 			length += 49;
 		else
 			length += 62;
@@ -133,24 +138,21 @@ void ATTDevice::AddAsset(int id, String name, String description, bool isActuato
 	_client->print(F("\",\"description\":\""));
 	_client->print(description);
 	_client->print(F("\",\"is\":\""));
-	if(isActuator) 
-		_client->print(F("actuator"));
-	else 
-		_client->print(F("sensor"));
+  _client->print(assetType);
 	if(typeLength == 0)
 		_client->print(F("\""));
-	else if(type[0] == '{'){
+	else if(dataType[0] == '{'){
 		_client->print(F("\",\"profile\": "));
-		_client->print(type);
+		_client->print(dataType);
 	}
 	else{
 		_client->print(F("\",\"profile\": { \"type\":\""));
-		_client->print(type);
+		_client->print(dataType);
 		_client->print(F("\" }"));
 	}
 	_client->print(F("}"));
 	_client->println();
-    _client->println();
+  _client->println();
 	
 	unsigned long maxTime = millis() + 1000;
 	while(millis() < maxTime)		//wait, but for the minimum amount of time.

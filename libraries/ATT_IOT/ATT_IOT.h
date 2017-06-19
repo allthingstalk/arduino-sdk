@@ -46,7 +46,7 @@ class ATTDevice
 		 * Create or update the specified asset. (call after connecting)
 		 * > After this call, the name will be in lower case, so that it can be used to compare with the topic of incomming messages.
 		 */
-		void AddAsset(int id, String name, String description, bool isActuator, String type);
+		void AddAsset(int id, String name, String description, String assetType, String type);
 
 		/**
 		 * Stop http processing & make certain that we can receive data from the mqtt server.
@@ -81,6 +81,7 @@ class ATTDevice
 		 * returns: the pin nr found in the topic
 		 */
 		int GetPinNr(char* topic, int topicLength);
+    
 	private:	
 		String _serverName;				//stores the name of the http server that we should use.
 		String _clientKey;				//the client key provided by the user.
