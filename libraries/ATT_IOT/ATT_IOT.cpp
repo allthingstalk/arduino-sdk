@@ -34,11 +34,10 @@ char SUCCESTXT[] = " established";
 #endif
 
 //create the object
-ATTDevice::ATTDevice(String deviceId, String clientId, String clientKey): _client(NULL), _mqttclient(NULL)
+ATTDevice::ATTDevice(String deviceId, String token): _client(NULL), _mqttclient(NULL)
 {
 	_deviceId = deviceId;
-	_clientId = clientId;
-	_clientKey = clientKey;
+	_token = token;
 }
 
 // connect with the http server
@@ -49,7 +48,7 @@ bool ATTDevice::Connect(Client* httpClient, char httpServer[])
 	
 	#ifdef DEBUG
 	Serial.print("Connecting to ");
-    Serial.println(httpServer);
+  Serial.println(httpServer);
 	#endif
 
 	if (!_client->connect(httpServer, 80))  // if you get a connection, report back via serial:
@@ -97,23 +96,20 @@ void ATTDevice::CloseHTTP()
 }
 
 // create or update the specified asset.
-void ATTDevice::AddAsset(int id, String name, String description, String assetType, String dataType)
+void ATTDevice::AddAsset(String name, String title, String description, String assetType, String dataType)
 {
   // Make a HTTP request:
 	{
-		String idStr(id);
-		_client->println("PUT /device/" + _deviceId + "/asset/" + idStr  + " HTTP/1.1");
+		_client->println("PUT /device/" + _deviceId + "/asset/" + name  + " HTTP/1.1");
 	}
     _client->print(F("Host: "));
     _client->println(_serverName);
     _client->println(F("Content-Type: application/json"));
-    _client->print(F("Auth-ClientKey: "));_client->println(_clientKey);
-    _client->print(F("Auth-ClientId: "));_client->println(_clientId); 
+    _client->print(F("Authorization: Bearer "));_client->println(_token);
 	
-	int typeLength = dataType.length();
 	_client->print(F("Content-Length: "));
 	{																					//make every mem op local, so it is unloaded asap
-		int length = name.length() + description.length() + typeLength;
+		int length = title.length() + description.length() + dataType.length();
 		if(assetType.equals("sensor"))
 			length += 6;
 		else if(assetType.equals("actuator"))
@@ -123,7 +119,7 @@ void ATTDevice::AddAsset(int id, String name, String description, String assetTy
    	else if(assetType.equals("config"))
 			length += 6;
     
-		if (typeLength == 0)
+		if (dataType.length() == 0)
 			length += 39;
 		else if(dataType[0] == '{')
 			length += 49;
@@ -133,13 +129,13 @@ void ATTDevice::AddAsset(int id, String name, String description, String assetTy
 	}
     _client->println();
     
-	_client->print(F("{\"name\":\"")); 
-	_client->print(name);
+	_client->print(F("{\"title\":\"")); 
+	_client->print(title);
 	_client->print(F("\",\"description\":\""));
 	_client->print(description);
 	_client->print(F("\",\"is\":\""));
   _client->print(assetType);
-	if(typeLength == 0)
+	if(dataType.length() == 0)
 		_client->print(F("\""));
 	else if(dataType[0] == '{'){
 		_client->print(F("\",\"profile\": "));
@@ -167,9 +163,8 @@ void ATTDevice::AddAsset(int id, String name, String description, String assetTy
 bool ATTDevice::Subscribe(PubSubClient& mqttclient)
 {
 	Serial.println("subscribing");
-	if(_clientId && _clientKey){
-		String brokerId = _clientId + ":" + _clientId;
-		return Subscribe(mqttclient, brokerId.c_str(), _clientKey.c_str());
+	if(_token){
+		return Subscribe(mqttclient, _token.c_str());
 	}
 	else{
 		#ifdef DEBUG
@@ -183,13 +178,13 @@ bool ATTDevice::Subscribe(PubSubClient& mqttclient)
 /*Stop http processing & make certain that we can receive data from the mqtt server, given the specified username and pwd.
   This Subscribe function can be used to connect to a fog gateway
 returns true when successful, false otherwise*/
-bool ATTDevice::Subscribe(PubSubClient& mqttclient, const char* username, const char* pwd)
+bool ATTDevice::Subscribe(PubSubClient& mqttclient, const char* username)
 {
 	_mqttclient = &mqttclient;	
-	_serverName = "";					//no longer need this reference.
-	CloseHTTP();
+	_serverName = "";  // no longer need this reference
+	CloseHTTP();  // close Http connection before opening Mqtt connection
 	_mqttUserName = username;
-	_mqttpwd = pwd;
+	_mqttpwd = "";
 	return MqttConnect();
 }
 
@@ -241,7 +236,7 @@ bool ATTDevice::Process()
 	return true;
 }
 
-//builds the content that has to be sent to the cloud using mqtt (either a csv value or a json string)
+// build the content that has to be sent to the cloud using mqtt (either a csv value or a json string)
 char* ATTDevice::BuildContent(String value)
 {
 	char* message_buff;
@@ -262,7 +257,7 @@ char* ATTDevice::BuildContent(String value)
 
 
 //send a data value to the cloud server for the sensor with the specified id.
-void ATTDevice::Send(String value, int id)
+void ATTDevice::Send(String value, String asset)
 {
 	if(_mqttclient->connected() == false)
 	{
@@ -274,31 +269,30 @@ void ATTDevice::Send(String value, int id)
 
 	char* message_buff = BuildContent(value);
 	
-	#ifdef DEBUG																					//don't need to write all of this if not debugging.
-	Serial.print(F("Publish to ")); Serial.print(id); Serial.print(": "); Serial.println(message_buff);																
+	#ifdef DEBUG  // don't need to write all of this if not debugging
+	Serial.print(F("Publish to ")); Serial.print(asset); Serial.print(": "); Serial.println(message_buff);																
 	#endif
 	
 	char* Mqttstring_buff;
 	{
-		String idStr(id);																			//turn it into a string, so we can easily calculate the nr of characters that the nr requires. 
-		int length = _clientId.length() + _deviceId.length() + 33 + idStr.length();
+		int length = _deviceId.length() + 21 + asset.length();  // 21 fixed chars + deviceId + assetName
 		Mqttstring_buff = new char[length];
-		sprintf(Mqttstring_buff, "client/%s/out/device/%s/asset/%s/state", _clientId.c_str(), _deviceId.c_str(), idStr.c_str());      
+		sprintf(Mqttstring_buff, "device/%s/asset/%s/state", _deviceId.c_str(), asset.c_str());      
 		Mqttstring_buff[length-1] = 0;
 	}
 	_mqttclient->publish(Mqttstring_buff, message_buff);
-	#ifndef FAST_MQTT											//some boards like the old arduino ethernet need a little time after sending mqtt data, other boards don't.
-	delay(100);													//give some time to the ethernet shield so it can process everything.       
+	#ifndef FAST_MQTT  // some boards like the old arduino ethernet need a little time after sending mqtt data, other boards don't.
+	delay(100);        // give some time to the ethernet shield so it can process everything.       
 	#endif
 	delete(message_buff);
 	delete(Mqttstring_buff);
 }
 
 
-//subscribe to the mqtt topic so we can receive data from the server.
+// subscribe to the mqtt topic so we can receive data from the server.
 void ATTDevice::MqttSubscribe()
 {
-	String MqttString = "client/" + _clientId + "/in/device/" + _deviceId + "/asset/+/command";  //the arduino is only interested in the actuator commands, no management commands
+	String MqttString = "device/" + _deviceId + "/asset/+/command";
 	char Mqttstring_buff[MqttString.length()+1];
     MqttString.toCharArray(Mqttstring_buff, MqttString.length()+1);
     _mqttclient->subscribe(Mqttstring_buff);
@@ -309,25 +303,23 @@ void ATTDevice::MqttSubscribe()
 }
 
 //returns the pin nr found in the topic
-int ATTDevice::GetPinNr(char* topic, int topicLength)
+String ATTDevice::GetAssetName(char* topic, int topicLength)
 {
-	char digitOffset = 9;						//skip the '/command' at the end of the topic
-	int result = topic[topicLength - digitOffset] - 48; 		// - 48 to convert digit-char to integer
-	
-	digitOffset++;
-    while(topic[topicLength - digitOffset] != '/'){
-		char digit = topic[topicLength - digitOffset];
-		if(digit == '-')											//we found a - sign in front of the number, so return the negative result.
-			return -result;
-		else{
-			int nextDigit = topic[topicLength - digitOffset] - 48;
-			for(int i = 9; i < digitOffset; i++)
-				nextDigit *= 10;
-			result += nextDigit;
-			digitOffset++;
-		}
-	}		
-    return result;
+  int i=0;
+  char* command = strtok(topic, "/");
+  while (command != 0)
+  {
+    if(i==3)  // 3rd section of topic contains asset name "device/<deviceId>/asset/<assetName>/command"
+    {
+      #ifdef DEBUG
+        Serial.print(command);
+      #endif
+      return command;
+    }
+    command = strtok(0, "/");  // next string section
+    i++;
+  }
+  return "";
 }
 
 void ATTDevice::GetHTTPResult()

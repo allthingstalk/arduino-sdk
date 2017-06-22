@@ -32,7 +32,7 @@ class ATTDevice
 		/**
 		 * Create the object, using the credentials of our device.
 		 */
-		ATTDevice(String deviceId, String clientId, String clientKey);
+    ATTDevice(String deviceId, String token);
 		
 		/**
 		 * Connect with the http server (call first)
@@ -46,7 +46,7 @@ class ATTDevice
 		 * Create or update the specified asset. (call after connecting)
 		 * > After this call, the name will be in lower case, so that it can be used to compare with the topic of incomming messages.
 		 */
-		void AddAsset(int id, String name, String description, String assetType, String type);
+		void AddAsset(String name, String title, String description, String assetType, String dataType);
 
 		/**
 		 * Stop http processing & make certain that we can receive data from the mqtt server.
@@ -59,12 +59,12 @@ class ATTDevice
 		 * This Subscribe function can be used to connect to a fog gateway
 		 * returns: true when successful, false otherwise
 		 */
-		bool Subscribe(PubSubClient& mqttclient, const char* username, const char* pwd);
+		bool Subscribe(PubSubClient& mqttclient, const char* username);
 		
 		/**
 		 * Send a data value to the cloud server for the sensor with the specified id.
 		 */
-		void Send(String value, int id);
+		void Send(String value, String asset);
 		
 		/**
 		 * Closes any open connections (http & mqtt) and resets the device. After this call, you can call connect and/or subscribe again. Credentials remain stored.
@@ -78,13 +78,13 @@ class ATTDevice
 		bool Process();
 		
 		/**
-		 * returns: the pin nr found in the topic
+		 * returns: the asset name found in the topic
 		 */
-		int GetPinNr(char* topic, int topicLength);
+		String GetAssetName(char* topic, int topicLength);
     
 	private:	
 		String _serverName;				//stores the name of the http server that we should use.
-		String _clientKey;				//the client key provided by the user.
+		String _token;				//the client key provided by the user.
 		Client* _client;				//raw http communication. Possible to save some memory here: pass the client as a param in connect, put the object local in the setup function.
 		
 		const char* _mqttUserName;		//we store a local copy of the the mqtt username and pwd, so we can auto reconnect if the connection was lost.

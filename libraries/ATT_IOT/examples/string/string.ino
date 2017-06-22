@@ -75,8 +75,8 @@ void setup()
   while(!Device.Connect(&ethClient, httpServer))            // connect the device with the IOT platform.
     Serial.println("retrying");
     
-  Device.AddAsset("knob", "knob", "rotary switch", "sensor", "{\"type\": \"integer\", \"minimum\": 0, \"maximum\": 1023}");
-  Device.AddAsset("led", "led", "light emitting diode", "actuator", "boolean");
+  Device.AddAsset(knobPin, "knob", "rotary switch", "sensor", "{\"type\": \"integer\", \"minimum\": 0, \"maximum\": 1023}");
+  Device.AddAsset(ledPin, "led", "light emitting diode", "actuator", "boolean");
   while(!Device.Subscribe(pubSub))                          // make certain that we can receive message from the iot platform (activate mqtt)
     Serial.println("retrying"); 
 }
@@ -88,10 +88,10 @@ void loop()
   unsigned long curTime = millis();
   if (curTime > (time + 1000))                              // publish light reading every 5 seconds to sensor 1
   {
-    unsigned int knobRead = analogRead(knobPin);           // read from light sensor (photocell)
-    if(prevVal != knobRead){
-      Device.Send(String(knobRead), "knob");
-      prevVal = knobRead;
+    unsigned int lightRead = analogRead(knobPin);           // read from light sensor (photocell)
+    if(prevVal != lightRead){
+      Device.Send(String(lightRead), knobPin);
+      prevVal = lightRead;
     }
     time = curTime;
   }
@@ -110,26 +110,39 @@ void callback(char* topic, byte* payload, unsigned int length)
           
     msgString = String(message_buff);
     msgString.toLowerCase();                            //to make certain that our comparison later on works ok (it could be that a 'True' or 'False' was sent)
-
+  }
+  int* idOut = NULL;
+  {                                                     //put this in a sub block, so any unused memory can be freed as soon as possible, required to save mem while sending data
+    int pinNr = Device.GetPinNr(topic, strlen(topic));
+    
     Serial.print("Payload: ");                          //show some debugging.
     Serial.println(msgString);
     Serial.print("Topic  : ");
     Serial.println(topic);
-  }
-
-  // put this in a sub block, so any unused memory can be freed as soon as possible, required to save mem while sending data
-  {
-    String assetName = Device.GetAssetName(topic, strlen(topic));
-    if(assetName == "led")
+    Serial.print("PinNr  : ");
+    Serial.println(pinNr);
+    
+    if(pinNr == ledPin)       
     {
-      if (msgString.indexOf("false") > -1) {
-        digitalWrite(ledPin, LOW);
-        Device.Send("false", "led");
+      if (msgString == "false") {
+        digitalWrite(ledPin, LOW);  // change the led    
+        idOut = &ledPin;
+        Serial.print("off ");
+        Serial.println(String(*idOut));
       }
-      else if (msgString.indexOf("true") > -1) {
+      else if (msgString == "true") {
         digitalWrite(ledPin, HIGH);
-        Device.Send("true", "led");
+        idOut = &ledPin;
+        Serial.print("on  ");
+        Serial.println(String(*idOut));
       }
     }
+  }
+  Serial.println(String(*idOut));
+  if(idOut != NULL)  // send value back to the platform as acknowledgement
+  {
+    Serial.print("sending ");
+    Serial.println(String(*idOut));
+    Device.Send(msgString, *idOut);    
   }
 }
