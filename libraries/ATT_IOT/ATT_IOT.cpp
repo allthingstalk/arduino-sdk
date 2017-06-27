@@ -312,7 +312,7 @@ String ATTDevice::GetAssetName(char* topic, int topicLength)
     if(i==3)  // 3rd section of topic contains asset name "device/<deviceId>/asset/<assetName>/command"
     {
       #ifdef DEBUG
-        Serial.print(command);
+        Serial.println(command);
       #endif
       return command;
     }

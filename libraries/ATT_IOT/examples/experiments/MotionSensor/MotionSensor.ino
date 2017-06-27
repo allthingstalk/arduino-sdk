@@ -19,10 +19,10 @@
 #include <PubSubClient.h>
 
 #include <ATT_IOT.h>  // AllThingsTalk for Makers Arduino Library
-#include <SPI.h>      // required to have support for signed/unsigned long type                    
+#include <SPI.h>      // required to have support for signed/unsigned long type        
 
 /*
-  AllThingsTalk Makers Arduino Experiment
+  PIR Motion Sensor AllThingsTalk Makers Arduino Example
   version 1.0 09/10/2014
   
   ### Instructions
@@ -30,7 +30,7 @@
   1. Setup the Arduino hardware
     - USB2Serial
     - Grove kit shield
-    - Grove Light sensor to A0
+    - Grove PIR Motion sensor to D2 and grove LEd to D8
   2. Add 'iot_att' library to your Arduino Environment. [Try this guide](http://arduino.cc/en/Guide/Libraries)
   3. fill in the missing strings (deviceId, clientId, clientKey, mac) and optionally change/add the sensor & actuator names, ids, descriptions, types
      For extra actuators, make certain to extend the callback code at the end of the sketch.
@@ -49,7 +49,8 @@ char token[] = "";
 ATTDevice Device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
 #define mqttServer httpServer       // MQTT Server Address
 
-int LIGHT = 0;  // analog 0 is the input pin, this corresponds with the number on the Grove shield where the Lightsensor is attached to
+int PIR = 2;  // define PIN number on shield & also used to construct Unique AssetID                      
+int LED = 8;  // define PIN number on shield & also used to construct Unique AssetID
 
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
@@ -58,7 +59,8 @@ PubSubClient pubSub(mqttServer, 1883, callback, ethClient);
 
 void setup()
 {
-  pinMode(LIGHT, OUTPUT);
+  pinMode(PIR, INPUT);
+  pinMode(LED, OUTPUT);
   
   Serial.begin(9600);  // init serial link for debugging
   
@@ -73,21 +75,25 @@ void setup()
   while(!Device.Connect(&ethClient, httpServer))  // connect the device with the IOT platform.
     Serial.println("retrying");
     
-  Device.AddAsset("Light", "Lightsensor", "light sensor", "sensor", "integer");  // Create the asset for your device
+  Device.AddAsset("PIR", "PIR", "Motion Sensor", "sensor", "boolean");           // create the asset for your device
+  Device.AddAsset("LED", "LED", "Light Emitting Diode", "actuator", "boolean");  // create the asset for your device
   
   while(!Device.Subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
     Serial.println("retrying");     
 }
 
-unsigned long time;  // only send every x milliseconds
+bool Motion = false;                                    
 void loop()
 {
-  unsigned long curTime = millis();
-  if (curTime > (time + 5000))  // enough time has passed
+  bool MotionRead = digitalRead(PIR);  // read status 
+  if (Motion != MotionRead)  // verify if value has changed
   {
-    unsigned int value = analogRead(LIGHT);  // read from light sensor
-    Device.Send(String(value), "Light");
-    time = curTime;
+    Motion = MotionRead;
+    delay(100);
+    if (MotionRead == 1)
+       Device.Send("true", "PIR");
+    else
+       Device.Send("false", "PIR");
   }
   Device.Process(); 
 }
@@ -95,5 +101,36 @@ void loop()
 
 // callback function: handles messages that were sent from the iot platform to this device.
 void callback(char* topic, byte* payload, unsigned int length) 
-{
+{ 
+  String msgString;
+  String assetName;
+  {
+    char message_buff[length + 1];
+    strncpy(message_buff, (char*)payload, length);
+    message_buff[length] = '\0';
+          
+    msgString = String(message_buff);
+  }
+
+  {
+    Serial.print("Payload: ");
+    Serial.println(msgString);
+    Serial.print("topic: ");
+    Serial.println(topic);
+
+    String assetName = Device.GetAssetName(topic, strlen(topic));
+    
+    if(assetName.equals("LED"))
+    {
+      msgString.toLowerCase();  // make sure we have 'true' and 'false' in lowercase for our boolean check
+      if (msgString.indexOf("true") > -1) {
+        digitalWrite(LED, HIGH);
+        Device.Send("true", "LED");
+      }
+      else if (msgString.indexOf("false") > -1) {
+        digitalWrite(LED, LOW);
+        Device.Send("false", "LED");
+      }
+    }
+  }
 }

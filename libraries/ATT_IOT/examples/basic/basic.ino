@@ -44,14 +44,15 @@
   - Make certain that the data type you used to create the asset is the expected data type. Ex, when you define the asset as 'int', don't send strings or boolean values.
 */
 
-char deviceId[] = "y152E2bBj4bB8ExRlbGPfyhl";
-char token[] = "spicy:4PVHOYY8rzvGm0lqFymocZUF6A7J7pxGQdbos6h";
+// define device credentials and endpoint
+char deviceId[] = "";
+char token[] = "";
+#define httpServer "tasty.allthingstalk.io"  // API endpoint
 
-ATTDevice Device(deviceId, token);            //create the object that provides the connection to the cloud to manager the device.
-#define httpServer "spicy.allthingstalk.io"                  // HTTP API Server host                  
-#define mqttServer httpServer                				// MQTT Server Address 
+ATTDevice Device(deviceId, token);           // create the object that provides the connection to the cloud to manager the device.
 
-int knobPin = 0;                                            // Analog 0 is the input pin + identifies the asset on the cloud platform
+#define mqttServer httpServer                // MQTT Server Address 
+
 int ledPin = 8;                                             // Pin 8 is the LED output pin + identifies the asset on the cloud platform
 
 //required for the device
@@ -103,6 +104,7 @@ void loop()
 void callback(char* topic, byte* payload, unsigned int length) 
 { 
   String msgString; 
+  String assetName = Device.GetAssetName(topic, strlen(topic));
   {                                                     //put this in a sub block, so any unused memory can be freed as soon as possible, required to save mem while sending data
     char message_buff[length + 1];                      //need to copy over the payload so that we can add a /0 terminator, this can then be wrapped inside a string for easy manipulation.
     strncpy(message_buff, (char*)payload, length);      //copy over the data
@@ -119,7 +121,6 @@ void callback(char* topic, byte* payload, unsigned int length)
 
   // put this in a sub block, so any unused memory can be freed as soon as possible, required to save mem while sending data
   {
-    String assetName = Device.GetAssetName(topic, strlen(topic));
     if(assetName == "led")
     {
       if (msgString.indexOf("false") > -1) {
