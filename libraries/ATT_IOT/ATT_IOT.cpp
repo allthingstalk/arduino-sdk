@@ -1,29 +1,32 @@
-/*
-   Copyright 2014-2016 AllThingsTalk
+/*    _   _ _ _____ _    _              _____     _ _     ___ ___  _  __
+ *   /_\ | | |_   _| |_ (_)_ _  __ _ __|_   _|_ _| | |__ / __|   \| |/ /
+ *  / _ \| | | | | | ' \| | ' \/ _` (_-< | |/ _` | | / / \__ \ |) | ' <
+ * /_/ \_\_|_| |_| |_||_|_|_||_\__, /__/ |_|\__,_|_|_\_\ |___/___/|_|\_\
+ *                             |___/
+ *
+ * Copyright 2017 AllThingsTalk
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*/
-
-#define DEBUG					//turns on debugging in the IOT library. comment out this line to save memory.
+#define DEBUG  // turns on debugging in the IOT library. comment out this line to save memory.
 #define FAST_MQTT
 
 
 #include "ATT_IOT.h"
 
-#define RETRYDELAY 5000					//the nr of milliseconds that we pause before retrying to create the connection
-#define ETHERNETDELAY 1000		//the nr of milliseconds that we pause to give the ethernet board time to start
+#define RETRYDELAY 5000     // the nr of milliseconds that we pause before retrying to create the connection
+#define ETHERNETDELAY 1000  // the nr of milliseconds that we pause to give the ethernet board time to start
 #define MQTTPORT 1883
 
 #ifdef DEBUG
@@ -175,9 +178,9 @@ bool ATTDevice::Subscribe(PubSubClient& mqttclient)
 	}
 }
 
-/*Stop http processing & make certain that we can receive data from the mqtt server, given the specified username and pwd.
-  This Subscribe function can be used to connect to a fog gateway
-returns true when successful, false otherwise*/
+// Stop http processing & make certain that we can receive data from the mqtt server, given the specified username and pwd.
+// This Subscribe function can be used to connect to a fog gateway
+// returns true when successful, false otherwise
 bool ATTDevice::Subscribe(PubSubClient& mqttclient, const char* username)
 {
 	_mqttclient = &mqttclient;	
@@ -188,10 +191,10 @@ bool ATTDevice::Subscribe(PubSubClient& mqttclient, const char* username)
 	return MqttConnect();
 }
 
-//tries to create a connection with the mqtt broker. also used to try and reconnect.
+// tries to create a connection with the mqtt broker. also used to try and reconnect.
 bool ATTDevice::MqttConnect()
 {
-	char mqttId[23]; // Or something long enough to hold the longest file name you will ever use.
+	char mqttId[23];  // or something long enough to hold the longest file name you will ever use
 	int length = _deviceId.length();
 	length = length > 22 ? 22 : length;
     _deviceId.toCharArray(mqttId, length);
@@ -221,7 +224,7 @@ bool ATTDevice::MqttConnect()
 	}
 }
 
-//check for any new mqtt messages.
+// check for any new mqtt messages
 bool ATTDevice::Process()
 {
 	if(_mqttclient->connected() == false)
@@ -256,7 +259,7 @@ char* ATTDevice::BuildContent(String value)
 }
 
 
-//send a data value to the cloud server for the sensor with the specified id.
+// send a data value to the cloud server for the sensor with the specified id
 void ATTDevice::Send(String value, String asset)
 {
 	if(_mqttclient->connected() == false)
@@ -289,7 +292,7 @@ void ATTDevice::Send(String value, String asset)
 }
 
 
-// subscribe to the mqtt topic so we can receive data from the server.
+// subscribe to the mqtt topic so we can receive data from the server
 void ATTDevice::MqttSubscribe()
 {
 	String MqttString = "device/" + _deviceId + "/asset/+/command";
@@ -302,7 +305,7 @@ void ATTDevice::MqttSubscribe()
 	#endif
 }
 
-//returns the pin nr found in the topic
+// returns the pin nr found in the topic
 String ATTDevice::GetAssetName(char* topic, int topicLength)
 {
   int i=0;
@@ -324,8 +327,8 @@ String ATTDevice::GetAssetName(char* topic, int topicLength)
 
 void ATTDevice::GetHTTPResult()
 {
-	// If there's incoming data from the net connection, send it out the serial port
-	// This is for debugging purposes only
+	// if there's incoming data from the net connection, send it out the serial port
+	// this is for debugging purposes only
 	if(_client->available()){
 		while (_client->available()) {
 			char c = _client->read();
@@ -338,4 +341,3 @@ void ATTDevice::GetHTTPResult()
 		#endif
 	}
 }
-
