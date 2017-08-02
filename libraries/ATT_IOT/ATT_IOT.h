@@ -30,96 +30,101 @@
 // this class represents the ATT cloud platform.
 class ATTDevice
 {
-	public:
-		/**
-		 * Create the object, using the credentials of our device.
-		 */
+  public:
+    /**
+     * Create the object, using the credentials of our device.
+     */
     ATTDevice(String deviceId, String token);
-		
-		/**
-		 * Connect with the http server (call first)
-		 * - <type>Client</type> the client object to use for communicating with the cloud HTTP server (this is usually an EthernetClient, WifiClient or similar)
-		 * - <type>httpServer</type> the name of the http server to use, kept in memory until after calling 'Subscribe' 
-		 * returns: true when subscribe was successful, otherwise false.
-		 */
-		bool Connect(Client* httpClient, char httpServer[]);
-		
-		/**
-		 * Create or update the specified asset. (call after connecting)
-		 * > After this call, the name will be in lower case, so that it can be used to compare with the topic of incomming messages.
-		 */
-		void AddAsset(String name, String title, String description, String assetType, String dataType);
-
-		/**
-		 * Stop http processing & make certain that we can receive data from the mqtt server.
-		 * returns: true when successful, false otherwise
-		 */
-		bool Subscribe(PubSubClient& mqttclient);
-		
-		/**
-		 * Stop http processing & make certain that we can receive data from the mqtt server, given the specified username and pwd.
-		 * This Subscribe function can be used to connect to a fog gateway
-		 * returns: true when successful, false otherwise
-		 */
-		bool Subscribe(PubSubClient& mqttclient, const char* username);
-		
-		/**
-		 * Send a data value to the cloud server for the sensor with the specified id.
-		 */
-		void Send(String value, String asset);
-		
-		/**
-		 * Closes any open connections (http & mqtt) and resets the device. After this call, you can call connect and/or subscribe again. Credentials remain stored.
-		 * > All clients (httpclient & pubsubClient) are the caller's responsibility to clean up.
-		 */
-		void Close();
-	
-		/**
-		 * Check for any new mqtt messages.
-		 */
-		bool Process();
-		
-		/**
-		 * returns: the asset name found in the topic
-		 */
-		String GetAssetName(char* topic, int topicLength);
     
-	private:	
-		String _serverName;				//stores the name of the http server that we should use.
-		String _token;				//the client key provided by the user.
-		Client* _client;				//raw http communication. Possible to save some memory here: pass the client as a param in connect, put the object local in the setup function.
-		
-		const char* _mqttUserName;		//we store a local copy of the the mqtt username and pwd, so we can auto reconnect if the connection was lost.
-		const char* _mqttpwd;	
-		
-		/**
-		 * Subscribe to the mqtt topic so we can receive data from the server.
-		 */
-		void MqttSubscribe();
-		
-		/**
-		 * Read all the data from the Ethernet card and display on the debug screen.
-		 */
-		void GetHTTPResult();
-		
-		/**
-		 * Builds the content that has to be sent to the cloud using mqtt (either a csv value or a json string)
-		 */
-		char* BuildContent(String value);
-		
-		/**
-		 * Closes the http connection, if any.
-		 */
-		void CloseHTTP();
-		
-		PubSubClient* _mqttclient;		//provides mqtt support (placed as protected, so we can build inheriters that can access the mqtt client directly (ex: network watchdog)
-		
-		/**
-		 * Tries to create a connection with the mqtt broker. also used to try and reconnect.
-		 */
-		bool MqttConnect();				//so inheriters can reconnect with the mqtt server if they detect a network loss.
-		String _deviceId;				//the device id provided by the user.
-		String _clientId;				//the client id provided by the user.	
+    /**
+     * Connect with the http server (call first)
+     *
+     * @param Client the client object to use for communicating with the cloud HTTP server (this is usually an EthernetClient, WifiClient or similar)
+     * @param httpServer the name of the http server to use, kept in memory until after calling 'Subscribe' 
+     *
+     * @return true when subscribe was successful, otherwise false
+     */
+    bool Connect(Client* httpClient, char httpServer[]);
+    
+    /**
+     * Create or update the specified asset.
+     *
+     * > After this call, the name will be in lower case, so that it can be used to compare with the topic of incomming messages.
+     */
+    void AddAsset(String name, String title, String description, String assetType, String dataType);
+
+    /**
+     * Stop http processing & make certain that we can receive data from the mqtt server.
+     *
+     * @return true when successful, false otherwise
+     */
+    bool Subscribe(PubSubClient& mqttclient);
+    
+    /**
+     * Stop http processing & make certain that we can receive data from the mqtt server, given the specified username and pwd.
+     *
+     * @return true when successful, false otherwise
+     */
+    bool Subscribe(PubSubClient& mqttclient, const char* username);
+    
+    /**
+     * Send a data value to the cloud server for the sensor with the specified id.
+     */
+    void Send(String value, String asset);
+    
+    /**
+     * Closes any open connections (http & mqtt) and resets the device. After this call, you can call connect and/or subscribe again. Credentials remain stored.
+     *
+     * > All clients (httpclient & pubsubClient) are the caller's responsibility to clean up.
+     */
+    void Close();
+  
+    /**
+     * Check for any new mqtt messages.
+     */
+    bool Process();
+    
+    /**
+     * @return the asset name found in the topic
+     */
+    String GetAssetName(char* topic, int topicLength);
+    
+  private:  
+    String _serverName;  // store the name of the http server that we should use
+    String _token;       // the client key provided by the user
+    Client* _client;     // raw http communication. Possible to save some memory here: pass the client as a param in connect, put the object local in the setup function
+    
+    const char* _mqttUserName;  // we store a local copy of the the mqtt username and pwd, so we can auto reconnect if the connection was lost
+    const char* _mqttpwd;  
+    
+    /**
+     * Subscribe to the mqtt topic so we can receive data from the server.
+     */
+    void MqttSubscribe();
+    
+    /**
+     * Read all the data from the Ethernet card and display on the debug screen.
+     */
+    void GetHTTPResult();
+    
+    /**
+     * Build the content that has to be sent to the cloud using mqtt (either a csv value or a json string).
+     */
+    char* BuildContent(String value);
+    
+    /**
+     * Close the http connection, if any.
+     */
+    void CloseHTTP();
+    
+    PubSubClient* _mqttclient;  // provides mqtt support
+    
+    /**
+     * Try to create a connection with the mqtt broker. also used to try and reconnect.
+     */
+    bool MqttConnect();  // so inheriters can reconnect with the mqtt server if they detect a network loss
+    String _deviceId;    // the device id provided by the user.
+    String _clientId;    // the client id provided by the user.  
 };
 
 #endif
