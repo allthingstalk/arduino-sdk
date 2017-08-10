@@ -42,21 +42,21 @@ class NW_WatchDog
     /**
      * Send a ping to the broker
      */
-    void Ping();
+    void ping();
   
     /**
      * Check if we need to resend a ping and if we received the previous ping in time.
      *
      * @return true if the previous ping was in time, else false is returned. You can then try to recreate the connection with the broker
      */
-    bool CheckPing();
+    bool checkPing();
     
     /**
      * Check if we received a ping back from the broker.If not, the broker connection will be closed (and reopened upon the next call to 'process'.
      *
      * @return true if the pin was for the network monitor actuator. Otherwise, it returns false
      */
-    bool IsWatchDog(int pinNr, String& value);
+    bool isWatchDog(int pinNr, String& value);
   
   private:  
     unsigned long _nextPingAt = 0;    // time when the next ping should be sent

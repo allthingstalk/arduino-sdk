@@ -44,50 +44,50 @@ class ATTDevice
      *
      * @return true when subscribe was successful, otherwise false
      */
-    bool Connect(Client* httpClient, char httpServer[]);
+    bool connect(Client* httpClient, char httpServer[]);
     
     /**
      * Create or update the specified asset.
      *
      * > After this call, the name will be in lower case, so that it can be used to compare with the topic of incomming messages.
      */
-    void AddAsset(String name, String title, String description, String assetType, String dataType);
+    void addAsset(String name, String title, String description, String assetType, String dataType);
 
     /**
      * Stop http processing & make certain that we can receive data from the mqtt server.
      *
      * @return true when successful, false otherwise
      */
-    bool Subscribe(PubSubClient& mqttclient);
+    bool subscribe(PubSubClient& mqttclient);
     
     /**
      * Stop http processing & make certain that we can receive data from the mqtt server, given the specified username and pwd.
      *
      * @return true when successful, false otherwise
      */
-    bool Subscribe(PubSubClient& mqttclient, const char* username);
+    bool subscribe(PubSubClient& mqttclient, const char* username);
     
     /**
      * Send a data value to the cloud server for the sensor with the specified id.
      */
-    void Send(String value, String asset);
+    void send(String value, String asset);
     
     /**
      * Closes any open connections (http & mqtt) and resets the device. After this call, you can call connect and/or subscribe again. Credentials remain stored.
      *
      * > All clients (httpclient & pubsubClient) are the caller's responsibility to clean up.
      */
-    void Close();
+    void close();
   
     /**
      * Check for any new mqtt messages.
      */
-    bool Process();
+    bool process();
     
     /**
      * @return the asset name found in the topic
      */
-    String GetAssetName(char* topic, int topicLength);
+    String getAssetName(char* topic, int topicLength);
     
   private:  
     String _serverName;  // store the name of the http server that we should use
@@ -100,29 +100,29 @@ class ATTDevice
     /**
      * Subscribe to the mqtt topic so we can receive data from the server.
      */
-    void MqttSubscribe();
+    void mqttSubscribe();
     
     /**
      * Read all the data from the Ethernet card and display on the debug screen.
      */
-    void GetHTTPResult();
+    void getHTTPResult();
     
     /**
      * Build the content that has to be sent to the cloud using mqtt (either a csv value or a json string).
      */
-    char* BuildContent(String value);
+    char* buildContent(String value);
     
     /**
      * Close the http connection, if any.
      */
-    void CloseHTTP();
+    void closeHTTP();
     
     PubSubClient* _mqttclient;  // provides mqtt support
     
     /**
      * Try to create a connection with the mqtt broker. also used to try and reconnect.
      */
-    bool MqttConnect();  // so inheriters can reconnect with the mqtt server if they detect a network loss
+    bool mqttConnect();  // so inheriters can reconnect with the mqtt server if they detect a network loss
     String _deviceId;    // the device id provided by the user.
     String _clientId;    // the client id provided by the user.  
 };

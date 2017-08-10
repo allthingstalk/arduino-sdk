@@ -44,7 +44,7 @@ ATTDevice::ATTDevice(String deviceId, String token): _client(NULL), _mqttclient(
 }
 
 // connect with the http server
-bool ATTDevice::Connect(Client* httpClient, char httpServer[])
+bool ATTDevice::connect(Client* httpClient, char httpServer[])
 {
 	_client = httpClient;
 	_serverName = httpServer;  // keep track of this value while working with the http server
@@ -74,9 +74,9 @@ bool ATTDevice::Connect(Client* httpClient, char httpServer[])
 
 // closes any open connections (http & mqtt) and resets the device. After this call,
 // you can call connect and/or subscribe again. Credentials remain stored
-void ATTDevice::Close()
+void ATTDevice::close()
 {
-	CloseHTTP();
+	closeHTTP();
 	_mqttUserName = NULL;
 	_mqttpwd = NULL;
 	if(_mqttclient){
@@ -86,7 +86,7 @@ void ATTDevice::Close()
 }
 
 // closes the http connection, if any
-void ATTDevice::CloseHTTP()
+void ATTDevice::closeHTTP()
 {
 	if(_client){
 		#ifdef DEBUG
@@ -99,7 +99,7 @@ void ATTDevice::CloseHTTP()
 }
 
 // create or update the specified asset.
-void ATTDevice::AddAsset(String name, String title, String description, String assetType, String dataType)
+void ATTDevice::addAsset(String name, String title, String description, String assetType, String dataType)
 {
   // Make a HTTP request:
 	{
@@ -159,15 +159,15 @@ void ATTDevice::AddAsset(String name, String title, String description, String a
 		if(_client->available()) break;
 		else delay(10);
 	}
-	GetHTTPResult();			//get the response from the server and show it.
+	getHTTPResult();			//get the response from the server and show it.
 }
 
 //connect with the http server and broker
-bool ATTDevice::Subscribe(PubSubClient& mqttclient)
+bool ATTDevice::subscribe(PubSubClient& mqttclient)
 {
 	Serial.println("subscribing");
 	if(_token){
-		return Subscribe(mqttclient, _token.c_str());
+		return subscribe(mqttclient, _token.c_str());
 	}
 	else{
 		#ifdef DEBUG
@@ -181,18 +181,18 @@ bool ATTDevice::Subscribe(PubSubClient& mqttclient)
 // Stop http processing & make certain that we can receive data from the mqtt server, given the specified username and pwd.
 // This Subscribe function can be used to connect to a fog gateway
 // returns true when successful, false otherwise
-bool ATTDevice::Subscribe(PubSubClient& mqttclient, const char* username)
+bool ATTDevice::subscribe(PubSubClient& mqttclient, const char* username)
 {
 	_mqttclient = &mqttclient;	
 	_serverName = "";  // no longer need this reference
-	CloseHTTP();  // close Http connection before opening Mqtt connection
+	closeHTTP();  // close Http connection before opening Mqtt connection
 	_mqttUserName = username;
 	_mqttpwd = "";
-	return MqttConnect();
+	return mqttConnect();
 }
 
 // tries to create a connection with the mqtt broker. also used to try and reconnect.
-bool ATTDevice::MqttConnect()
+bool ATTDevice::mqttConnect()
 {
 	char mqttId[23];  // or something long enough to hold the longest file name you will ever use
 	int length = _deviceId.length();
@@ -212,7 +212,7 @@ bool ATTDevice::MqttConnect()
 		Serial.print(MQTTSERVTEXT);
 		Serial.println(SUCCESTXT);
 		#endif
-		MqttSubscribe();
+		mqttSubscribe();
 		return true;
 	}
 	else{
@@ -225,14 +225,14 @@ bool ATTDevice::MqttConnect()
 }
 
 // check for any new mqtt messages
-bool ATTDevice::Process()
+bool ATTDevice::process()
 {
 	if(_mqttclient->connected() == false)
 	{
 		#ifdef DEBUG	
 		Serial.println(F("Lost broker connection,restarting from process")); 
 		#endif
-		if(MqttConnect() == false)
+		if(mqttConnect() == false)
 			return false;
 	}
 	_mqttclient->loop();
@@ -240,7 +240,7 @@ bool ATTDevice::Process()
 }
 
 // build the content that has to be sent to the cloud using mqtt (either a csv value or a json string)
-char* ATTDevice::BuildContent(String value)
+char* ATTDevice::buildContent(String value)
 {
 	char* message_buff;
 	int length;
@@ -260,17 +260,17 @@ char* ATTDevice::BuildContent(String value)
 
 
 // send a data value to the cloud server for the sensor with the specified id
-void ATTDevice::Send(String value, String asset)
+void ATTDevice::send(String value, String asset)
 {
 	if(_mqttclient->connected() == false)
 	{
 		#ifdef DEBUG	
 		Serial.println(F("Lost broker connection,restarting from send")); 
 		#endif
-		MqttConnect();
+		mqttConnect();
 	}
 
-	char* message_buff = BuildContent(value);
+	char* message_buff = buildContent(value);
 	
 	#ifdef DEBUG  // don't need to write all of this if not debugging
 	Serial.print(F("Publish to ")); Serial.print(asset); Serial.print(": "); Serial.println(message_buff);																
@@ -293,7 +293,7 @@ void ATTDevice::Send(String value, String asset)
 
 
 // subscribe to the mqtt topic so we can receive data from the server
-void ATTDevice::MqttSubscribe()
+void ATTDevice::mqttSubscribe()
 {
 	String MqttString = "device/" + _deviceId + "/asset/+/command";
 	char Mqttstring_buff[MqttString.length()+1];
@@ -306,7 +306,7 @@ void ATTDevice::MqttSubscribe()
 }
 
 // returns the pin nr found in the topic
-String ATTDevice::GetAssetName(char* topic, int topicLength)
+String ATTDevice::getAssetName(char* topic, int topicLength)
 {
   int i=0;
   char* command = strtok(topic, "/");
@@ -325,7 +325,7 @@ String ATTDevice::GetAssetName(char* topic, int topicLength)
   return "";
 }
 
-void ATTDevice::GetHTTPResult()
+void ATTDevice::getHTTPResult()
 {
 	// if there's incoming data from the net connection, send it out the serial port
 	// this is for debugging purposes only

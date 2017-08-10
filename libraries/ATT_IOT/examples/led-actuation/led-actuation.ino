@@ -26,19 +26,19 @@
 #include <PubSubClient.h>
 
 #include <ATT_IOT.h>
-#include <SPI.h>  // required to have support for signed/unsigned long type.
+#include <SPI.h>  // required to have support for signed/unsigned long type
 
-// define device credentials and endpoint
-char deviceId[] = "";
-char token[] = "";
+// define device credentials
+char deviceId[] = "awhwKcb1KdKX9ILDCQrX4rFf";
+char token[] = "maker:4LIZEoplVnzXm0lqFv4veKAwOWC1qvpQOFtTeVQ";
+
+// define http and mqtt endpoints
 #define httpServer "api.allthingstalk.io"  // API endpoint
+#define mqttServer "api.allthingstalk.io"  // broker
 
-ATTDevice Device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device.
+ATTDevice device(deviceId, token);
 
-#define mqttServer httpServer  // MQTT Server Address 
-
-int ledPin = 8;   // our LED is connected to pin D8 on the Arduino
-int knobPin = 0; // rotary sensor is connected to pin A0 on the Arduino
+int ledPin = 2;  // our LED is connected to pin 2 on the Arduino
 
 // required for the device
 void callback(char* topic, byte* payload, unsigned int length);
@@ -54,42 +54,30 @@ void setup()
   if (Ethernet.begin(mac) == 0)                       // initialize the Ethernet connection
   { 
     Serial.println(F("DHCP failed,end"));
-    while(true);                                      // we failed to connect, halt execution here
+    while(true);  // we failed to connect, halt execution here
   }
   delay(1000);  // give the Ethernet shield a second to initialize
   
-  while(!Device.Connect(&ethClient, httpServer))  // connect the device with the IOT platform
+  while(!device.connect(&ethClient, httpServer))  // connect the device with AllThingsTalk
     Serial.println("retrying");
-    
-  Device.AddAsset("knob", "knob", "rotary switch", "sensor", "{\"type\": \"integer\", \"minimum\": 0, \"maximum\": 1023}");
-  Device.AddAsset("led", "led", "light emitting diode", "actuator", "boolean");
-  while(!Device.Subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
+
+  device.addAsset("led", "led", "light emitting diode", "actuator", "boolean");
+  while(!device.subscribe(pubSub))  // make certain that we can receive messages over mqtt
     Serial.println("retrying"); 
 }
 
-unsigned long time;  // only send every x amount of time
-unsigned int prevVal =0;
 void loop()
 {
-  unsigned long curTime = millis();
-  if (curTime > (time + 1000))
-  {
-    unsigned int knobRead = analogRead(knobPin);
-    if(prevVal != knobRead){
-      Device.Send(String(knobRead), "knob");
-      prevVal = knobRead;
-    }
-    time = curTime;
-  }
-  Device.Process(); 
+  device.process();  // check callback for incoming messages
 }
 
 
-// Callback function: handles messages that were sent from the iot platform to this device.
+// callback function
+// handle messages that were sent from the AllThingsTalk cloud to this device
 void callback(char* topic, byte* payload, unsigned int length) 
 { 
   String msgString; 
-  String assetName = Device.GetAssetName(topic, strlen(topic));
+  String assetName = device.getAssetName(topic, strlen(topic));
   {
     char message_buff[length + 1];
     strncpy(message_buff, (char*)payload, length);
@@ -104,17 +92,16 @@ void callback(char* topic, byte* payload, unsigned int length)
     Serial.println(topic);
   }
 
-  // put this in a sub block, so any unused memory can be freed as soon as possible, required to save mem while sending data
   {
     if(assetName == "led")
     {
       if (msgString.indexOf("false") > -1) {
         digitalWrite(ledPin, LOW);
-        Device.Send("false", "led");
+        device.send("false", "led");
       }
       else if (msgString.indexOf("true") > -1) {
         digitalWrite(ledPin, HIGH);
-        Device.Send("true", "led");
+        device.send("true", "led");
       }
     }
   }

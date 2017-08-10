@@ -28,16 +28,15 @@
 #include <ATT_IOT.h>
 #include <SPI.h>  // required to have support for signed/unsigned long type.
 
-// define device credentials and endpoint
-char deviceId[] = "";
-char token[] = "";
+// define device credentials
+char deviceId[] = "awhwKcb1KdKX9ILDCQrX4rFf";
+char token[] = "maker:4LIZEoplVnzXm0lqFv4veKAwOWC1qvpQOFtTeVQ";
+
+// define http and mqtt endpoints
 #define httpServer "api.allthingstalk.io"  // API endpoint
+#define mqttServer "api.allthingstalk.io"  // broker
 
-ATTDevice Device(deviceId, token);           // create the object that provides the connection to the cloud to manager the device.
-
-#define mqttServer httpServer                // MQTT Server Address 
-
-int ledPin = 8;                                             // Pin 8 is the LED output pin + identifies the asset on the cloud platform
+ATTDevice device(deviceId, token);
 
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
@@ -52,16 +51,16 @@ void setup()
   if (Ethernet.begin(mac) == 0)                       // initialize the Ethernet connection
   { 
     Serial.println(F("DHCP failed,end"));
-    while(true);                                      // we failed to connect, halt execution here
+    while(true);  // we failed to connect, halt execution here
   }
   delay(1000);  // give the Ethernet shield a second to initialize
   
-  while(!Device.Connect(&ethClient, httpServer))  // connect the device with the IOT platform
+  while(!device.connect(&ethClient, httpServer))  // connect the device with AllThingsTalk
     Serial.println("retrying");
     
-  Device.AddAsset("counter", "counter", "counting up", "sensor", "{\"type\": \"integer\"}");
+  device.addAsset("counter", "counter", "counting up", "sensor", "{\"type\": \"integer\"}");
   
-  while(!Device.Subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
+  while(!device.subscribe(pubSub))  // make certain that we can receive messages over mqtt
     Serial.println("retrying"); 
 }
 
@@ -74,16 +73,17 @@ void loop()
   if (curTime > (time + 3000))  // update and send counter value every 3 seconds
   {
     counter++;
-    Device.Send(String(counter), "counter");
+    device.send(String(counter), "counter");
     time = curTime;
   }
-  Device.Process(); 
+  device.process(); 
 }
 
-// callback function: handles messages that were sent from the iot platform to this device
+// callback function
+// handle messages that were sent from the AllThingsTalk cloud to this device
 void callback(char* topic, byte* payload, unsigned int length) 
 { 
-  String assetName = Device.GetAssetName(topic, strlen(topic));
+  String assetName = device.getAssetName(topic, strlen(topic));
   Serial.print("Data arrived from asset: ");
   Serial.println(assetName);
 }
