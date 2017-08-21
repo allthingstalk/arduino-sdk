@@ -15,7 +15,7 @@ Download the source code and unzip and copy the content to your arduino librarie
 
 ### Examples
 
-Two basic examples are found in the `/examples` folder.
+Two basic examples are found in the `/libraries/ATT_IOT/examples` folder.
 * `counter.ino` send data from your Arduino to AllThingsTalk _(sensing)_
 * `led-actuation.ino` toggle a led on your Arduino from AllThingsTalk _(actuation)_
 
