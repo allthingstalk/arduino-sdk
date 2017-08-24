@@ -21,8 +21,8 @@
 
 #include <Ethernet.h>
 //#include <Ethernet2.h>
-#include <EthernetClient.h>
 
+#include <EthernetClient.h>
 #include <PubSubClient.h>
 
 #include <ATT_IOT.h>

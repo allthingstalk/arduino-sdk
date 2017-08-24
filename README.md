@@ -15,6 +15,10 @@ Download the source code and unzip and copy the content to your arduino librarie
 
 ### Examples
 
+> Depending on the board, make sure you use the correct Ethernet library in your sketch.
+* Arduino Ethernet `#include <Ethernet.h>`
+* Arduino Leonardo `#include <Ethernet2.h>`
+
 Two basic examples are found in the `/libraries/ATT_IOT/examples` folder.
 * `counter.ino` send data from your Arduino to AllThingsTalk _(sensing)_
 * `led-actuation.ino` toggle a led on your Arduino from AllThingsTalk _(actuation)_
