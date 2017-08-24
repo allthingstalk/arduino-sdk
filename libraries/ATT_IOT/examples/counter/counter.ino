@@ -29,8 +29,8 @@
 #include <SPI.h>  // required to have support for signed/unsigned long type.
 
 // define device credentials
-char deviceId[] = "awhwKcb1KdKX9ILDCQrX4rFf";
-char token[] = "maker:4LIZEoplVnzXm0lqFv4veKAwOWC1qvpQOFtTeVQ";
+char deviceId[] = "";
+char token[] = "";
 
 // define http and mqtt endpoints
 #define httpServer "api.allthingstalk.io"  // API endpoint
