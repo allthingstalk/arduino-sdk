@@ -31,10 +31,12 @@
 // define device credentials and endpoint
 char deviceId[] = "";
 char token[] = "";
-#define httpServer "api.allthingstalk.io"  // API endpoint
 
-ATTDevice Device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
-#define mqttServer httpServer       // MQTT Server Address
+// define http and mqtt endpoints
+#define httpServer "api.allthingstalk.io"  // API endpoint
+#define mqttServer "api.allthingstalk.io"  // MQTT Server Address
+
+ATTDevice device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
 
 int PIR = 2;  // define PIN number on shield & also used to construct Unique AssetID                      
 int LED = 8;  // define PIN number on shield & also used to construct Unique AssetID
@@ -59,13 +61,13 @@ void setup()
   }
   delay(1000);
   
-  while(!Device.Connect(&ethClient, httpServer))  // connect the device with the IOT platform.
+  while(!device.connect(&ethClient, httpServer))  // connect the device with the IOT platform.
     Serial.println("retrying");
     
-  Device.AddAsset("PIR", "PIR", "Motion Sensor", "sensor", "boolean");           // create the asset for your device
-  Device.AddAsset("LED", "LED", "Light Emitting Diode", "actuator", "boolean");  // create the asset for your device
+  device.addAsset("PIR", "PIR", "Motion Sensor", "sensor", "boolean");           // create the asset for your device
+  device.addAsset("LED", "LED", "Light Emitting Diode", "actuator", "boolean");  // create the asset for your device
   
-  while(!Device.Subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
+  while(!device.subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
     Serial.println("retrying");     
 }
 
@@ -78,11 +80,11 @@ void loop()
     Motion = MotionRead;
     delay(100);
     if (MotionRead == 1)
-       Device.Send("true", "PIR");
+      device.send("true", "PIR");
     else
-       Device.Send("false", "PIR");
+      device.send("false", "PIR");
   }
-  Device.Process(); 
+  device.process(); 
 }
 
 
@@ -105,18 +107,18 @@ void callback(char* topic, byte* payload, unsigned int length)
     Serial.print("topic: ");
     Serial.println(topic);
 
-    String assetName = Device.GetAssetName(topic, strlen(topic));
+    String assetName = device.getAssetName(topic, strlen(topic));
     
     if(assetName.equals("LED"))
     {
       msgString.toLowerCase();  // make sure we have 'true' and 'false' in lowercase for our boolean check
       if (msgString.indexOf("true") > -1) {
         digitalWrite(LED, HIGH);
-        Device.Send("true", "LED");
+        device.send("true", "LED");
       }
       else if (msgString.indexOf("false") > -1) {
         digitalWrite(LED, LOW);
-        Device.Send("false", "LED");
+        device.send("false", "LED");
       }
     }
   }

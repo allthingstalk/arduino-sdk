@@ -31,10 +31,12 @@
 // define device credentials and endpoint
 char deviceId[] = "";
 char token[] = "";
-#define httpServer "api.allthingstalk.io"  // API endpoint
 
-ATTDevice Device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
-#define mqttServer httpServer       // MQTT Server Address
+// define http and mqtt endpoints
+#define httpServer "api.allthingstalk.io"  // API endpoint
+#define mqttServer "api.allthingstalk.io"  // MQTT Server Address
+
+ATTDevice device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
 
 int DOORBELL = 8;
 
@@ -57,12 +59,12 @@ void setup()
   }
   delay(1000);
   
-  while(!Device.Connect(&ethClient, httpServer))  // connect the device with the IOT platform.
+  while(!device.connect(&ethClient, httpServer))  // connect the device with the IOT platform.
     Serial.println("retrying");
     
-  Device.AddAsset("Doorbell", "Doorbell", "Doorbell button", "sensor", "boolean");  // create the asset for your device
+  device.addAsset("Doorbell", "Doorbell", "Doorbell button", "sensor", "boolean");  // create the asset for your device
   
-  while(!Device.Subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
+  while(!device.subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
     Serial.println("retrying");     
 }
 
@@ -75,11 +77,11 @@ void loop()
     button = buttonValue;
     delay(100);
     if (buttonValue == 1)
-       Device.Send("true", "Doorbell");
+      device.send("true", "Doorbell");
     else
-       Device.Send("false", "Doorbell");
+      device.send("false", "Doorbell");
   }
-  Device.Process(); 
+  device.process(); 
 }
 
 // callback function: handles messages that were sent from the iot platform to this device.

@@ -31,10 +31,12 @@
 // define device credentials and endpoint
 char deviceId[] = "";
 char token[] = "";
-#define httpServer "api.allthingstalk.io"  // API endpoint
 
-ATTDevice Device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
-#define mqttServer httpServer       // MQTT Server Address
+// define http and mqtt endpoints
+#define httpServer "api.allthingstalk.io"  // API endpoint
+#define mqttServer "api.allthingstalk.io"  // MQTT Server Address
+
+ATTDevice device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
 
 int LIGHT = 0;  // analog 0 is the input pin, this corresponds with the number on the Grove shield where the Lightsensor is attached to
 
@@ -57,12 +59,12 @@ void setup()
   }
   delay(1000);
   
-  while(!Device.Connect(&ethClient, httpServer))  // connect the device with the IOT platform.
+  while(!device.connect(&ethClient, httpServer))  // connect the device with the IOT platform.
     Serial.println("retrying");
     
-  Device.AddAsset("Light", "Lightsensor", "light sensor", "sensor", "integer");  // Create the asset for your device
+  device.addAsset("Light", "Lightsensor", "light sensor", "sensor", "integer");  // Create the asset for your device
   
-  while(!Device.Subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
+  while(!device.subscribe(pubSub))  // make certain that we can receive message from the iot platform (activate mqtt)
     Serial.println("retrying");     
 }
 
@@ -73,7 +75,7 @@ void loop()
   if (curTime > (time + 5000))  // enough time has passed
   {
     unsigned int value = analogRead(LIGHT);  // read from light sensor
-    Device.Send(String(value), "Light");
+    device.send(String(value), "Light");
     time = curTime;
   }
   Device.Process(); 
