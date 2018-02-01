@@ -291,6 +291,17 @@ void ATTDevice::send(String value, String asset)
 	delete(Mqttstring_buff);
 }
 
+bool ATTDevice::sendPayload(void* packet, unsigned char size)
+{
+  return true;
+}
+
+bool ATTDevice::sendCbor(unsigned char* data, unsigned int size)
+{
+  return true;
+}
+
+
 
 // subscribe to the mqtt topic so we can receive data from the server
 void ATTDevice::mqttSubscribe()

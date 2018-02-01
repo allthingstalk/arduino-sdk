@@ -89,6 +89,12 @@ class ATTDevice
      */
     String getAssetName(char* topic, int topicLength);
     
+    // Send binary payload
+    bool sendPayload(void* packet, unsigned char size);
+    
+    // Send cbor payload
+    bool sendCbor(unsigned char* data, unsigned int size);
+    
   private:  
     String _serverName;  // store the name of the http server that we should use
     String _token;       // the client key provided by the user
