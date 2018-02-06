@@ -4,7 +4,7 @@
  * /_/ \_\_|_| |_| |_||_|_|_||_\__, /__/ |_|\__,_|_|_\_\ |___/___/|_|\_\
  *                             |___/
  *
- * Copyright 2017 AllThingsTalk
+ * Copyright 2018 AllThingsTalk
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,39 @@
  * limitations under the License.
  */
 
+
+// Select your preferred method of sending data
+#define JSON
+//#define CBOR
+//#define BINARY
+
+/****************************************************************/
 #include <Ethernet.h>
 //#include <Ethernet2.h>
 
 #include <EthernetClient.h>
 #include <PubSubClient.h>
+#include <keys.h>
 
 #include <ATT_IOT.h>
 #include <SPI.h>  // required to have support for signed/unsigned long type.
 
-// define device credentials
-char deviceId[] = "";
-char token[] = "";
-
-// define http and mqtt endpoints
-#define httpServer "api.allthingstalk.io"  // API endpoint
-#define mqttServer "api.allthingstalk.io"  // broker
-
-ATTDevice device(deviceId, token);
-
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
 EthernetClient ethClient;
-PubSubClient pubSub(mqttServer, 1883, callback, ethClient);
+PubSubClient pubSub(MQTT_SERVER, 1883, callback, ethClient);
+
+ATTDevice device(DEVICE_ID, DEVICE_TOKEN);
+
+#ifdef CBOR
+  #include <CborBuilder.h>
+  CborBuilder payload(device);
+#endif
+
+#ifdef BINARY
+  #include <PayloadBuilder.h>
+  PayloadBuilder payload(device);
+#endif
 
 void setup()
 {
@@ -55,10 +65,10 @@ void setup()
   }
   delay(1000);  // give the Ethernet shield a second to initialize
   
-  while(!device.connect(&ethClient, httpServer))  // connect the device with AllThingsTalk
+  while(!device.connect(&ethClient, HTTP_SERVER))  // connect the device with AllThingsTalk
     Serial.println("retrying");
     
-  device.addAsset("counter", "counter", "counting up", "sensor", "{\"type\": \"integer\"}");
+  //device.addAsset("counter", "counter", "counting up", "sensor", "{\"type\": \"integer\"}");
   
   while(!device.subscribe(pubSub))  // make certain that we can receive messages over mqtt
     Serial.println("retrying"); 
@@ -70,17 +80,35 @@ int counter = 0;
 void loop()
 {
   unsigned long curTime = millis();
-  if (curTime > (time + 3000))  // update and send counter value every 3 seconds
+  if (curTime > (time + 5000))  // Update and send counter value every 5 seconds
   {
-    counter++;
+    #ifdef JSON
     device.send(String(counter), "counter");
+    #endif
+
+    #ifdef CBOR
+    payload.reset();
+    payload.map(1);
+    payload.addInteger(counter, "counter");
+    payload.send();
+    #endif
+
+    #ifdef BINARY
+    payload.reset();
+    payload.addInteger(counter);
+    payload.send();
+    #endif
+    
+    counter++;
     time = curTime;
   }
-  device.process(); 
+  device.process();  // Check for incoming messages
 }
 
-// callback function
-// handle messages that were sent from the AllThingsTalk cloud to this device
+/****
+ * Callback function
+ * Handle messages that were sent from the AllThingsTalk cloud to this device
+ */
 void callback(char* topic, byte* payload, unsigned int length) 
 { 
   String assetName = device.getAssetName(topic, strlen(topic));

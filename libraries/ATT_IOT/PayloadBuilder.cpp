@@ -67,13 +67,13 @@ uint8_t PayloadBuilder::copy(uint8_t* dst)
 
 bool PayloadBuilder::send(void* packet, unsigned char size)
 {
-  return _device->sendPayload(packet, size);
+  return _device->sendBinary(packet, size);
 }
 
 bool PayloadBuilder::send()
 {
   memcpy(sendBuffer, buffer, cursor);
-  return _device->sendPayload(&sendBuffer, cursor);
+  return _device->sendBinary(&sendBuffer, cursor);
 }
 
 uint8_t PayloadBuilder::addBoolean(uint8_t value)

@@ -1,0 +1,6 @@
+{
+  "comment" : "Counter example",
+  "sense": [
+    {"asset": "counter", "value": {"byte": 0, "bytelength": 2, "byteorder": "little", "type": "integer"}}
+  ]
+}

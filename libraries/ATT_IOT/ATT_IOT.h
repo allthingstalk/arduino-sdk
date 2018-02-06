@@ -26,6 +26,7 @@
 #include <Client.h>
 #include <PubSubClient.h>
 #include <string.h>
+#include <EthernetClient.h>
 
 // this class represents the ATT cloud platform.
 class ATTDevice
@@ -44,7 +45,7 @@ class ATTDevice
      *
      * @return true when subscribe was successful, otherwise false
      */
-    bool connect(Client* httpClient, char httpServer[]);
+    bool connect(Client* httpClient, const char httpServer[]);
     
     /**
      * Create or update the specified asset.
@@ -90,7 +91,7 @@ class ATTDevice
     String getAssetName(char* topic, int topicLength);
     
     // Send binary payload
-    bool sendPayload(void* packet, unsigned char size);
+    bool sendBinary(void* packet, unsigned char size);
     
     // Send cbor payload
     bool sendCbor(unsigned char* data, unsigned int size);
@@ -116,7 +117,7 @@ class ATTDevice
     /**
      * Build the content that has to be sent to the cloud using mqtt (either a csv value or a json string).
      */
-    char* buildContent(String value);
+    char* buildJsonContent(String value);
     
     /**
      * Close the http connection, if any.
