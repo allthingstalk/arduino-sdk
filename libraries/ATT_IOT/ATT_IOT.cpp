@@ -320,7 +320,7 @@ bool ATTDevice::sendBinary(void* packet, unsigned char size)
     sprintf(Mqttstring_buff, "device/%s/state", _deviceId.c_str());      
     Mqttstring_buff[length-1] = 0;
   }
-  _mqttclient->publish(Mqttstring_buff, (unsigned char*)packet);
+  _mqttclient->publish(Mqttstring_buff, (unsigned char*)packet, size);
   #ifndef FAST_MQTT  // some boards like the old arduino ethernet need a little time after sending mqtt data, other boards don't.
   delay(100);        // give some time to the ethernet shield so it can process everything.       
   #endif
