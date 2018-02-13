@@ -315,7 +315,7 @@ bool ATTDevice::sendBinary(void* packet, unsigned char size)
   
   char* Mqttstring_buff;
   {
-    int length = _deviceId.length() + 14;  // 14 fixed chars + deviceId + assetName
+    int length = _deviceId.length() + 14;  // 14 fixed chars + deviceId
     Mqttstring_buff = new char[length];
     sprintf(Mqttstring_buff, "device/%s/state", _deviceId.c_str());      
     Mqttstring_buff[length-1] = 0;
@@ -339,14 +339,26 @@ bool ATTDevice::sendCbor(unsigned char* data, unsigned int size)
     mqttConnect();
   }
   
+  #ifdef DEBUG  // don't need to write all of this if not debugging
+  Serial.print(F("Publish to "));
+  // Print actual payload from binary buffer
+  char hexTable[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	for (unsigned char i = 0; i < size; i++)
+  {
+		Serial.print(hexTable[data[i] / 16]);
+ 		Serial.print(hexTable[data[i] % 16]);
+	}
+  Serial.println();
+  #endif
+  
   char* Mqttstring_buff;
   {
-    int length = _deviceId.length() + 14;  // 14 fixed chars + deviceId + assetName
+    int length = _deviceId.length() + 14;  // 14 fixed chars + deviceId
     Mqttstring_buff = new char[length];
     sprintf(Mqttstring_buff, "device/%s/state", _deviceId.c_str());      
     Mqttstring_buff[length-1] = 0;
   }
-  _mqttclient->publish(Mqttstring_buff, data);
+  _mqttclient->publish(Mqttstring_buff, data, size);
   #ifndef FAST_MQTT  // some boards like the old arduino ethernet need a little time after sending mqtt data, other boards don't.
   delay(100);        // give some time to the ethernet shield so it can process everything.       
   #endif
