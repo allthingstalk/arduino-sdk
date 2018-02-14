@@ -15,14 +15,14 @@ Download the source code and unzip and copy the content to your arduino librarie
 
 ### Device credentials
 
-You can either set them globally, using the same credentials for all sketches using the sdk.<br>
-Or you can set them locally in a specific sketch, overriding the global settings.
+You can either set them **globally**, using the same credentials for all sketches using the sdk.<br>
+Or you can set them **locally** in a specific sketch, overriding the global settings.
 
 > You find your *device_id* and *device_token* under the **SETTINGS > Authentication** tab of your device in AllThingsTalk.
 
 #### Global
 
-Open the `keys.h` file on your computer and fill in your *device_id* and *device_token*
+Open the `keys.h` file - found in the ATT_IOT folder of the repository - on your computer and fill in your *device_id* and *device_token*
 
 ```
 /****
