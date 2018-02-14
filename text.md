@@ -110,15 +110,15 @@ Two basic examples are found in the `/libraries/ATT_IOT/examples` folder.
 * `led-actuation.ino` toggle a led on your Arduino from AllThingsTalk _(actuation)_
 
 Three experiments from the Arduino Rapid Development kit
-* ``
-* ``
-* ``
+* `light-sensor.ino` Measure light in your environment
+* `motion-sensor.ino` Turn on LED and get a notification when movement is detected
+* `smart-doorbell` Get notified when someone is at the door
 
 #### NodeMCU
 
 `nodemcu.ino` will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
 
-> Make sure you fill in your network credentials in `setup()` method of the sketch
+> Make sure you fill in your network credentials in the `setup()` method of the sketch
 ```
 setupWiFi("your_wifi_ssid", "your_wifi_password");  // Connect to the WiFi network
 ```
