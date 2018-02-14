@@ -61,10 +61,6 @@ class CborBuilder {
     void addNumber(double number);
     
     void writeInt(const int value);
-    void writeInt(const int32_t value);
-    void writeInt(const int64_t value);
-    void writeInt(const uint32_t value);
-    void writeInt(const uint64_t value);
     void writeBytes(const unsigned char *data, const unsigned int size);
     void writeString(const char *data, const unsigned int size);
     void writeString(const String str);

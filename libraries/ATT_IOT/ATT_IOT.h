@@ -35,7 +35,9 @@ class ATTDevice
     /**
      * Create the object, using the credentials of our device.
      */
-    ATTDevice(String deviceId, String token);
+    ATTDevice();
+    
+    void setCredentials(String deviceId, String token);
     
     /**
      * Connect with the http server (call first)
@@ -123,6 +125,11 @@ class ATTDevice
      * Close the http connection, if any.
      */
     void closeHTTP();
+    
+    /**
+     * Close the mqtt connection, if any.
+     */
+    void closeMQTT();
     
     PubSubClient* _mqttclient;  // provides mqtt support
     

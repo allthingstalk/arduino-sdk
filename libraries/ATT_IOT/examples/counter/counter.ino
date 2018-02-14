@@ -31,17 +31,20 @@
 
 #include <EthernetClient.h>
 #include <PubSubClient.h>
-#include <keys.h>
 
 #include <ATT_IOT.h>
 #include <SPI.h>  // required to have support for signed/unsigned long type.
 
+// Define http and mqtt endpoints
+#define httpServer "api.allthingstalk.io"  // API endpoint
+#define mqttServer "api.allthingstalk.io"  // broker
+
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
 EthernetClient ethClient;
-PubSubClient pubSub(MQTT_SERVER, 1883, callback, ethClient);
+PubSubClient pubSub(mqtt, 1883, callback, ethClient);
 
-ATTDevice device(DEVICE_ID, DEVICE_TOKEN);
+ATTDevice device;
 
 #ifdef CBOR
   #include <CborBuilder.h>
@@ -65,7 +68,7 @@ void setup()
   }
   delay(1000);  // give the Ethernet shield a second to initialize
   
-  while(!device.connect(&ethClient, HTTP_SERVER))  // connect the device with AllThingsTalk
+  while(!device.connect(&ethClient, http))  // connect the device with AllThingsTalk
     Serial.println("retrying");
     
   //device.addAsset("counter", "counter", "counting up", "sensor", "{\"type\": \"integer\"}");
@@ -74,13 +77,13 @@ void setup()
     Serial.println("retrying"); 
 }
 
-unsigned long time;
+unsigned long ctime;
 unsigned int prevVal = 0;
 int counter = 0;
 void loop()
 {
   unsigned long curTime = millis();
-  if (curTime > (time + 5000))  // Update and send counter value every 5 seconds
+  if (curTime > (ctime + 5000))  // Update and send counter value every 5 seconds
   {
     #ifdef JSON
     device.send(String(counter), "counter");
@@ -100,7 +103,7 @@ void loop()
     #endif
     
     counter++;
-    time = curTime;
+    ctime = curTime;
   }
   device.process();  // Check for incoming messages
 }

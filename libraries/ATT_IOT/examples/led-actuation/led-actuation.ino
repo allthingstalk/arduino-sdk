@@ -28,15 +28,11 @@
 #include <ATT_IOT.h>
 #include <SPI.h>  // required to have support for signed/unsigned long type
 
-// define device credentials
-char deviceId[] = "";
-char token[] = "";
-
-// define http and mqtt endpoints
+// Define http and mqtt endpoints
 #define httpServer "api.allthingstalk.io"  // API endpoint
 #define mqttServer "api.allthingstalk.io"  // broker
 
-ATTDevice device(deviceId, token);
+ATTDevice device;
 
 int ledPin = 2;  // our LED is connected to pin 2 on the Arduino
 
@@ -62,6 +58,7 @@ void setup()
     Serial.println("retrying");
 
   device.addAsset("led", "led", "light emitting diode", "actuator", "boolean");
+  
   while(!device.subscribe(pubSub))  // make certain that we can receive messages over mqtt
     Serial.println("retrying"); 
 }

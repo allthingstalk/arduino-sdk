@@ -28,19 +28,14 @@
 #include <ATT_IOT.h>  // AllThingsTalk for Makers Arduino Library
 #include <SPI.h>      // required to have support for signed/unsigned long type                    
 
-// define device credentials and endpoint
-char deviceId[] = "";
-char token[] = "";
-
-// define http and mqtt endpoints
+// Define http and mqtt endpoints
 #define httpServer "api.allthingstalk.io"  // API endpoint
-#define mqttServer "api.allthingstalk.io"  // MQTT Server Address
+#define mqttServer "api.allthingstalk.io"  // broker
 
-ATTDevice device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
+ATTDevice device;
 
 int LIGHT = 0;  // analog 0 is the input pin, this corresponds with the number on the Grove shield where the Lightsensor is attached to
 
-//required for the device
 void callback(char* topic, byte* payload, unsigned int length);
 EthernetClient ethClient;
 PubSubClient pubSub(mqttServer, 1883, callback, ethClient);
@@ -68,15 +63,15 @@ void setup()
     Serial.println("retrying");     
 }
 
-unsigned long time;  // only send every x milliseconds
+unsigned long sysTime;  // only send every x milliseconds
 void loop()
 {
   unsigned long curTime = millis();
-  if (curTime > (time + 5000))  // enough time has passed
+  if (curTime > (sysTime + 5000))  // enough time has passed
   {
     unsigned int value = analogRead(LIGHT);  // read from light sensor
     device.send(String(value), "Light");
-    time = curTime;
+    sysTime = curTime;
   }
   Device.Process(); 
 }

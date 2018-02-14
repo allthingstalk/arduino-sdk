@@ -24,6 +24,7 @@
 
 
 #include "ATT_IOT.h"
+#include <keys.h>
 
 #define RETRYDELAY 5000     // the nr of milliseconds that we pause before retrying to create the connection
 #define ETHERNETDELAY 1000  // the nr of milliseconds that we pause to give the ethernet board time to start
@@ -37,7 +38,13 @@ char SUCCESTXT[] = " established";
 #endif
 
 //create the object
-ATTDevice::ATTDevice(String deviceId, String token): _client(NULL), _mqttclient(NULL)
+ATTDevice::ATTDevice(): _client(NULL), _mqttclient(NULL)
+{
+  _deviceId = DEVICE_ID;
+  _token = DEVICE_TOKEN;
+}
+
+void ATTDevice::setCredentials(String deviceId, String token)
 {
   _deviceId = deviceId;
   _token = token;
@@ -77,12 +84,7 @@ bool ATTDevice::connect(Client* httpClient, const char httpServer[])
 void ATTDevice::close()
 {
   closeHTTP();
-  _mqttUserName = NULL;
-  _mqttpwd = NULL;
-  if(_mqttclient){
-    _mqttclient->disconnect();
-    _mqttclient = NULL;
-  }
+  closeMQTT();
 }
 
 // closes the http connection, if any
@@ -95,6 +97,16 @@ void ATTDevice::closeHTTP()
     _client->flush();
     _client->stop();
     _client = NULL;
+  }
+}
+
+void ATTDevice::closeMQTT()
+{
+  _mqttUserName = NULL;
+  _mqttpwd = NULL;
+  if(_mqttclient){
+    _mqttclient->disconnect();
+    _mqttclient = NULL;
   }
 }
 

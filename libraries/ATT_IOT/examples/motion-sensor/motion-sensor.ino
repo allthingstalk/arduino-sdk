@@ -28,20 +28,15 @@
 #include <ATT_IOT.h>  // AllThingsTalk for Makers Arduino Library
 #include <SPI.h>      // required to have support for signed/unsigned long type        
 
-// define device credentials and endpoint
-char deviceId[] = "";
-char token[] = "";
-
 // define http and mqtt endpoints
 #define httpServer "api.allthingstalk.io"  // API endpoint
-#define mqttServer "api.allthingstalk.io"  // MQTT Server Address
+#define mqttServer "api.allthingstalk.io"  // broker
 
-ATTDevice device(deviceId, token);  // create the object that provides the connection to the cloud to manager the device
+ATTDevice device;
 
 int PIR = 2;  // define PIN number on shield & also used to construct Unique AssetID                      
 int LED = 8;  // define PIN number on shield & also used to construct Unique AssetID
 
-//required for the device
 void callback(char* topic, byte* payload, unsigned int length);
 EthernetClient ethClient;
 PubSubClient pubSub(mqttServer, 1883, callback, ethClient);

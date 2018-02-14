@@ -209,34 +209,6 @@ void CborBuilder::writeInt(const int value)
   writeTypeAndValue(0, (uint32_t)value);
 }
 
-void CborBuilder::writeInt(const uint32_t value)
-{
-  writeTypeAndValue(0, value);
-}
-
-void CborBuilder::writeInt(const uint64_t value)
-{
-  writeTypeAndValue(0, value);
-}
-
-void CborBuilder::writeInt(const int64_t value)
-{
-  if(value < 0) {
-    writeTypeAndValue(1, (uint64_t) -(value+1));
-  } else {
-    writeTypeAndValue(0, (uint64_t) value);
-  }
-}
-
-void CborBuilder::writeInt(const int32_t value)
-{
-  if(value < 0) {
-    writeTypeAndValue(1, (uint32_t) -(value+1));
-  } else {
-    writeTypeAndValue(0, (uint32_t) value);
-  }
-}
-
 void CborBuilder::writeBytes(const unsigned char *data, const unsigned int size)
 {
   writeTypeAndValue(2, (uint32_t)size);
