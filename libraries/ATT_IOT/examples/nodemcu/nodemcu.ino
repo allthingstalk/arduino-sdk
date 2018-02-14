@@ -42,7 +42,7 @@ void setup()
   digitalWrite(LED_BUILTIN, HIGH);  // Turn the onboard LED off
   
   Serial.begin(9600);  // Init serial link for debugging
-  setupWiFi("Co.Station Gent", "FiberMeUpScotty");  // Try connect to the WiFi network
+  setupWiFi("", "");  // Connect to the WiFi network
   
   while(!device.connect(&espClient, http))  // Connect to AllThingsTalk
     Serial.println("retrying");
