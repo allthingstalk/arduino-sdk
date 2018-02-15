@@ -44,6 +44,13 @@ ATTDevice::ATTDevice(): _client(NULL), _mqttclient(NULL)
   _token = DEVICE_TOKEN;
 }
 
+//create the object
+ATTDevice::ATTDevice(String deviceId, String deviceToken): _client(NULL), _mqttclient(NULL)
+{
+  _deviceId = deviceId;
+  _token = deviceToken;
+}
+
 void ATTDevice::setCredentials(String deviceId, String token)
 {
   _deviceId = deviceId;

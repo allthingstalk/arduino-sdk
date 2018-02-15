@@ -36,6 +36,7 @@ class ATTDevice
      * Create the object, using the credentials of our device.
      */
     ATTDevice();
+    ATTDevice(String deviceId, String deviceToken);
     
     void setCredentials(String deviceId, String token);
     

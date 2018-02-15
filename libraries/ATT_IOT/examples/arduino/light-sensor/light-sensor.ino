@@ -63,15 +63,15 @@ void setup()
     Serial.println("retrying");     
 }
 
-unsigned long sysTime;  // only send every x milliseconds
+unsigned long prevTime;  // only send every x milliseconds
 void loop()
 {
   unsigned long curTime = millis();
-  if (curTime > (sysTime + 5000))  // enough time has passed
+  if (curTime > (prevTime + 5000))  // enough time has passed
   {
     unsigned int value = analogRead(LIGHT);  // read from light sensor
     device.send(String(value), "Light");
-    sysTime = curTime;
+    prevTime = curTime;
   }
   Device.Process(); 
 }

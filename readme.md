@@ -18,11 +18,14 @@ Download the source code and unzip and copy the content to your arduino librarie
 You can either set them **globally**, using the same credentials for all sketches using the sdk.<br>
 Or you can set them **locally** in a specific sketch, overriding the global settings.
 
-> You find your *device_id* and *device_token* under the **SETTINGS > Authentication** tab of your device in AllThingsTalk.
+You can find these credentials under your device at AllThingsTalk in the _SETTINGS > Authentication_ tab.
 
-#### Global
+Depending on how you initialize the device object in your sketch, the global or local credentials will be used.
 
-Open the `keys.h` file - found in the ATT_IOT folder of the repository - on your computer and fill in your *device_id* and *device_token*
+* `ATT_IOT device("your_device_id", "your_device_token");` will use the provided local credentials.
+* `ATT_IOT device;` will use the global credentials from the **keys.h** file
+
+> Open the `keys.h` file on your computer and enter your _deviceid_ and _devicetoken_ of the arduino-nbiot-sdk.
 
 ```
 /****
@@ -35,14 +38,6 @@ const char* DEVICE_ID = "your_device_id";
 const char* DEVICE_TOKEN = "your_device_token";
 
 #endif
-```
-
-#### Local
-
-Simply add this line at the start of your `setup()` method.
-
-```
-  device.setCredentials("your_device_id", "your_device_token");
 ```
 
 ### Payloads and sending data

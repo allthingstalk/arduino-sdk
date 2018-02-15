@@ -77,13 +77,13 @@ void setup()
     Serial.println("retrying"); 
 }
 
-unsigned long ctime;
+unsigned long preTime;
 unsigned int prevVal = 0;
 int counter = 0;
 void loop()
 {
   unsigned long curTime = millis();
-  if (curTime > (ctime + 5000))  // Update and send counter value every 5 seconds
+  if (curTime > (preTime + 5000))  // Update and send counter value every 5 seconds
   {
     #ifdef JSON
     device.send(String(counter), "counter");
@@ -103,7 +103,7 @@ void loop()
     #endif
     
     counter++;
-    ctime = curTime;
+    preTime = curTime;
   }
   device.process();  // Check for incoming messages
 }

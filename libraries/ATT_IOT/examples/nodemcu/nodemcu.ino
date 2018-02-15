@@ -24,8 +24,8 @@
 #include <ArduinoJson.h>
 
 // Define http and mqtt endpoints
-#define httpServer "api.allthingstalk.io"  // API endpoint
-#define mqttServer "api.allthingstalk.io"  // broker
+#define http "api.allthingstalk.io"  // API endpoint
+#define mqtt "api.allthingstalk.io"  // broker
 
 #include <ATT_IOT.h>
 #include <SPI.h>  // required to have support for signed/unsigned long type.
@@ -71,18 +71,18 @@ void setupWiFi(const char* ssid, const char* password)
   Serial.println("WiFi connected");
 }
 
-unsigned long ctime;
+unsigned long prevTime;
 unsigned int prevVal = 0;
 int counter = 0;
 void loop()
 {
   unsigned long curTime = millis();
-  if (curTime > (ctime + 5000))  // Update and send counter value every 5 seconds
+  if (curTime > (prevTime + 5000))  // Update and send counter value every 5 seconds
   {
     device.send(String(counter), "counter");
     
     counter++;
-    ctime = curTime;
+    prevTime = curTime;
   }
   device.process();  // Check for incoming messages
 }
