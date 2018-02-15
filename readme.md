@@ -6,8 +6,8 @@ Arduino SDK
 This SDK is for Arduino and Arduino compatible boards, such as
 - Arduino Leonardo
 - Arduino Ethernet
-- LinkitOne
-- NodeMCU
+- LinkitOne `http://download.labs.mediatek.com/package_mtk_linkit_index.json`
+- NodeMCU `http://arduino.esp8266.com/stable/package_esp8266com_index.json`
 
 ### Installation
 
@@ -94,26 +94,38 @@ PayloadBuilder payload(device);  // Construct a payload object
 
 ### Examples
 
+All examples can be found in the `ATT_IOT/examples` folder.
+
 #### Arduino Ethernet / Leonardo
 
 > Depending on the board, make sure you use the correct Ethernet library in your sketch.
 * Arduino Ethernet `#include <Ethernet.h>`
 * Arduino Leonardo `#include <Ethernet2.h>`
 
-Two basic examples are found in the `/libraries/ATT_IOT/examples` folder.
-* `counter.ino` send data from your Arduino to AllThingsTalk _(sensing)_
-* `led-actuation.ino` toggle a led on your Arduino from AllThingsTalk _(actuation)_
-
-Three experiments from the Arduino Rapid Development kit
-* `light-sensor.ino` Measure light in your environment
-* `motion-sensor.ino` Turn on LED and get a notification when movement is detected
-* `smart-doorbell` Get notified when someone is at the door
+* Basic examples for sensing and actuation
+  * `counter.ino` send data from your Arduino to AllThingsTalk _(sensing)_
+  * `led-actuation.ino` toggle a led on your Arduino from AllThingsTalk _(actuation)_
+* Rapid Development Kit examples
+  * `light-sensor.ino` Measure light in your environment
+  * `motion-sensor.ino` Turn on LED and get a notification when movement is detected
+  * `smart-doorbell` Get notified when someone is at the door
 
 #### NodeMCU
 
-`nodemcu.ino` will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
+* `nodemcu.ino` will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
 
 > Make sure you fill in your network credentials in the `setup()` method of the sketch
 ```
 setupWiFi("your_wifi_ssid", "your_wifi_password");  // Connect to the WiFi network
 ```
+
+#### Linkit One
+
+Please take note of the following
+
+> In the **ATT_IOT.h** file, comment the following line `// #include <EthernetClient.h>`
+
+> Newer versions of the Arduino IDE may also conflict with the Linkit One. [Arduino IDE version 1.6.5](https://www.arduino.cc/en/Main/OldSoftwareReleases#previous) is tested and will work with the examples below.
+
+* `counter.ino`
+* `gps.ino`
