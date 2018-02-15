@@ -94,7 +94,8 @@ PayloadBuilder payload(device);  // Construct a payload object
 
 ### Examples
 
-All examples can be found in the `ATT_IOT/examples` folder.
+All examples can be found in the `arduino-sdk/libraries/ATT_IOT/examples/` folder.<br>
+Please note the minor board specific settings below.
 
 #### Arduino Ethernet / Leonardo
 
@@ -102,28 +103,15 @@ All examples can be found in the `ATT_IOT/examples` folder.
 * Arduino Ethernet `#include <Ethernet.h>`
 * Arduino Leonardo `#include <Ethernet2.h>`
 
-* Basic examples for sensing and actuation
-  * `counter.ino` send data from your Arduino to AllThingsTalk _(sensing)_
-  * `led-actuation.ino` toggle a led on your Arduino from AllThingsTalk _(actuation)_
-* Rapid Development Kit examples
-  * `light-sensor.ino` Measure light in your environment
-  * `motion-sensor.ino` Turn on LED and get a notification when movement is detected
-  * `smart-doorbell` Get notified when someone is at the door
-
 #### NodeMCU
 
-* `nodemcu.ino` will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
+The example will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
 
 > Make sure you fill in your network credentials in the **setup()** method of the sketch
 `setupWiFi("your_wifi_ssid", "your_wifi_password");  // Connect to the WiFi network`
 
 #### Linkit One
 
-* `counter.ino`
-* `gps.ino`
-
-Please take note of the following
-
 > In the **ATT_IOT.h** file, comment the following line `// #include <EthernetClient.h>`
 
-> Newer versions of the Arduino IDE may conflict with the Linkit One. [Arduino IDE version 1.6.5](https://www.arduino.cc/en/Main/OldSoftwareReleases#previous) is tested and will work with the examples below.
+> Newer versions of the Arduino IDE may conflict with the Linkit One. [Arduino IDE version 1.6.5](https://www.arduino.cc/en/Main/OldSoftwareReleases#previous) is tested and will work with the provided examples.
