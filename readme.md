@@ -121,11 +121,11 @@ setupWiFi("your_wifi_ssid", "your_wifi_password");  // Connect to the WiFi netwo
 
 #### Linkit One
 
+* `counter.ino`
+* `gps.ino`
+
 Please take note of the following
 
 > In the **ATT_IOT.h** file, comment the following line `// #include <EthernetClient.h>`
 
-> Newer versions of the Arduino IDE may also conflict with the Linkit One. [Arduino IDE version 1.6.5](https://www.arduino.cc/en/Main/OldSoftwareReleases#previous) is tested and will work with the examples below.
-
-* `counter.ino`
-* `gps.ino`
+> Newer versions of the Arduino IDE may conflict with the Linkit One. [Arduino IDE version 1.6.5](https://www.arduino.cc/en/Main/OldSoftwareReleases#previous) is tested and will work with the examples below.
