@@ -28,8 +28,6 @@
 
 #include <Wire.h>
 
-//#include <LTask.h>
-
 #include <PubSubClient.h>
 #include <ATT_IOT.h>
 
@@ -46,7 +44,7 @@ float calc_dist(float flat1, float flon1, float flat2, float flon2);
 LGPRSClient c;
 PubSubClient pubSub(mqtt, 1883, callback, c);
 
-ATTDevice device("ZYeZlf0TlnlUPOh0ItwEa8nv", "maker:4SIGPzLBnbWOm0lqFwXF9MlLpKa14Ed7iLEeqr3");
+ATTDevice device;
 
 void setup()
 {

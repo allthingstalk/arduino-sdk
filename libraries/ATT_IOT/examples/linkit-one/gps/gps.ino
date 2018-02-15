@@ -7,10 +7,12 @@
 
 #include <Wire.h>
 
-//#include <LTask.h>
-
 #include <PubSubClient.h>
 #include <ATT_IOT.h>
+
+// Define http and mqtt endpoints
+#define http "api.allthingstalk.io"  // API endpoint
+#define mqtt "api.allthingstalk.io"  // broker
 
 int location_GPS = 2;
 int map_GPS = 10;
@@ -28,23 +30,21 @@ unsigned long startTime = millis();
 
 gpsSentenceInfoStruct info;  // instantiate
 
-ATTDevice device("ZYeZlf0TlnlUPOh0ItwEa8nv", "maker:4SIGPzLBnbWOm0lqFwXF9MlLpKa14Ed7iLEeqr3");    // Create the object that provides the connection to the cloud to manager the device.
-char httpServer[] = "api.allthingstalk.io";       // HTTP API Server host                  
-char mqttServer[] = "api.allthingstalk.io";		    // MQTT Server Address
-
-// Required for the device
 void callback(char* topic, byte* payload, unsigned int length);
 void connectToPlatform();
 unsigned long getTime();
 float calc_dist(float flat1, float flon1, float flat2, float flon2);
+
 LGPRSClient c;
-PubSubClient pubSub(mqttServer, 1883, callback, c);
+PubSubClient pubSub(mqtt, 1883, callback, c);
+
+ATTDevice device;
 
 void setup()
 {
   Serial.begin(115200);
-  //while(!Serial);               // for the linkit, we need to wait until the serial monitor is initialized correctly, if we don't do this, we don't get to see the logging.
-                                  // Warning for battery and mains power usage, comment out the above line, otherwise the setup() will continue to wait for the Serial to become available
+  while(!Serial);  // Wait until the serial monitor is initialized correctly
+
   Serial.println("Starting");
   
   while(!LGPRS.attachGPRS("internet.be", "",""))
@@ -54,9 +54,12 @@ void setup()
   }
   Serial.println("Connected");
 
-  LGPS.powerOn();                                       // Start the GPS first as it takes time to get a fix
+  // Start the GPS first as it takes time to get a fix
+  LGPS.powerOn();
   Serial.println("GPS Powered on and waiting.");
   delay(200);
+  
+  //connectToPlatform();  // Leave in comment if you only want to connect after the first fix is found
 
   Serial.println("\nTime since startup for setup: " + String(getTime()) + " ms");
 }
@@ -90,7 +93,7 @@ void loop()
 
       // check if we already have a connection with the platform
       if(!connected)
-        connectToPlatform();
+       connectToPlatform();
 
       if(prevLat != -1)     // We have a previous point (so we can calculate distance to our current point)
       {
@@ -191,9 +194,9 @@ unsigned long getTime()
   return millis() - startTime;
 }
 
-/*************************************************************************
+/****
  * Send coordinates
- *************************************************************************/
+ */
 void sendCoordinates()
 {
   String Location = String(lat,6) + "," + String(lng,6);
@@ -203,27 +206,28 @@ void sendCoordinates()
   Serial.println("Coordinates: " + Location);
 }
 
-/*************************************************************************
- * Connect to SmartLiving
- *************************************************************************/
+/****
+ * Connect to AllThingsTalk
+ * Create assets
+ * Subscribe to mqtt
+ */
 void connectToPlatform()
 {
-  if(device.connect(&c, httpServer))  // connect the device with the IOT platform.
-  {
-    device.addAsset(String(location_GPS), "location", "location", "sensor", "string");
-    device.addAsset(String(map_GPS), "map", "realtime map", "sensor", "{\"type\": \"object\", \"properties\": {\"lat\": {\"type\": \"number\"},\"long\": {\"type\": \"number\"}}}");
-    device.subscribe(pubSub);
-    connected = true;
-  }
-  else 
-    while(true);
+  while(!device.connect(&c, http))  // Connect to AllThingsTalk
+    Serial.println("retrying");
 
-  Serial.println("\nTime since startup to connect to platform: " + String(getTime()) + " ms\n");
+  device.addAsset(String(location_GPS), "location", "location", "sensor", "string");
+  device.addAsset(String(map_GPS), "map", "realtime map", "sensor", "{\"type\": \"object\", \"properties\": {\"lat\": {\"type\": \"number\"},\"long\": {\"type\": \"number\"}}}");
+  device.subscribe(pubSub);
+  connected = true;
+    
+  while(!device.subscribe(pubSub))  // Subscribe to mqtt
+    Serial.println("retrying"); 
 }
 
-/*************************************************************************
- * Function to calculate the distance between two waypoints
- *************************************************************************/
+/****
+ * Calculate the distance between two waypoints
+ */
 float calc_dist(float flat1, float flon1, float flat2, float flon2)
 {
   float dist_calc = 0;

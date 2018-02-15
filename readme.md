@@ -114,10 +114,8 @@ All examples can be found in the `ATT_IOT/examples` folder.
 
 * `nodemcu.ino` will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
 
-> Make sure you fill in your network credentials in the `setup()` method of the sketch
-```
-setupWiFi("your_wifi_ssid", "your_wifi_password");  // Connect to the WiFi network
-```
+> Make sure you fill in your network credentials in the **setup()** method of the sketch
+`setupWiFi("your_wifi_ssid", "your_wifi_password");  // Connect to the WiFi network`
 
 #### Linkit One
 
