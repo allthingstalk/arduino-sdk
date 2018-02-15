@@ -36,8 +36,8 @@
 #include <SPI.h>  // required to have support for signed/unsigned long type.
 
 // Define http and mqtt endpoints
-#define httpServer "api.allthingstalk.io"  // API endpoint
-#define mqttServer "api.allthingstalk.io"  // broker
+#define http "api.allthingstalk.io"  // API endpoint
+#define mqtt "api.allthingstalk.io"  // broker
 
 //required for the device
 void callback(char* topic, byte* payload, unsigned int length);
@@ -77,13 +77,13 @@ void setup()
     Serial.println("retrying"); 
 }
 
-unsigned long preTime;
+unsigned long prevTime;
 unsigned int prevVal = 0;
 int counter = 0;
 void loop()
 {
   unsigned long curTime = millis();
-  if (curTime > (preTime + 5000))  // Update and send counter value every 5 seconds
+  if (curTime > (prevTime + 5000))  // Update and send counter value every 5 seconds
   {
     #ifdef JSON
     device.send(String(counter), "counter");
@@ -103,7 +103,7 @@ void loop()
     #endif
     
     counter++;
-    preTime = curTime;
+    prevTime = curTime;
   }
   device.process();  // Check for incoming messages
 }
