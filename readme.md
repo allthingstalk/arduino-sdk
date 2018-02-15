@@ -25,7 +25,7 @@ Depending on how you initialize the device object in your sketch, the global or 
 * `ATT_IOT device("your_device_id", "your_device_token");` will use the provided local credentials.
 * `ATT_IOT device;` will use the global credentials from the **keys.h** file
 
-> Open the `keys.h` file on your computer and enter your _deviceid_ and _devicetoken_ of the arduino-nbiot-sdk.
+> Open the `keys.h` file on your computer and enter your _deviceid_ and _devicetoken_.
 
 ```
 /****
