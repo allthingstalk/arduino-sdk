@@ -108,7 +108,11 @@ Please note the minor board specific settings below.
 The example will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
 
 > Make sure you fill in your network credentials in the **setup()** method of the sketch
-> `setupWiFi("your_wifi_ssid", "your_wifi_password");  // Connect to the WiFi network`
+```
+// Enter your WiFi credentials here!
+setupWiFi("your_wifi_ssid", "your_wifi_password");
+//
+```
 
 #### Linkit One
 

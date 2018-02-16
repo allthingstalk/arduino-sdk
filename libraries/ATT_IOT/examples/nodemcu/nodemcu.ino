@@ -19,6 +19,9 @@
  * limitations under the License.
  */
 
+//#define JSON
+#define CBOR
+
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
@@ -36,13 +39,21 @@ PubSubClient pubSub(mqtt, 1883, callback, espClient);
 
 ATTDevice device;
 
+#ifdef CBOR
+  #include <CborBuilder.h>
+  CborBuilder payload(device);
+#endif
+
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);  // Turn the onboard LED off
   
   Serial.begin(9600);  // Init serial link for debugging
-  setupWiFi("", "");  // Connect to the WiFi network
+  
+  // Enter your WiFi credentials here!
+  setupWiFi("", "");
+  //
   
   while(!device.connect(&espClient, http))  // Connect to AllThingsTalk
     Serial.println("retrying");
@@ -79,7 +90,16 @@ void loop()
   unsigned long curTime = millis();
   if (curTime > (prevTime + 5000))  // Update and send counter value every 5 seconds
   {
+    #ifdef JSON
     device.send(String(counter), "counter");
+    #endif
+
+    #ifdef CBOR  // Send data using Cbor
+    payload.reset();
+    payload.map(1);
+    payload.addInteger(counter, "counter");
+    payload.send();
+    #endif
     
     counter++;
     prevTime = curTime;
@@ -117,7 +137,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     else
       digitalWrite(LED_BUILTIN, HIGH);  // Turn the onboard LED off
 
-    device.send(value, "toggle");  // Send command back as ACK
+    device.send(value, "toggle");  // Send command back as ACK using JSON
   }
   else
     Serial.println("Parsing JSON failed");
