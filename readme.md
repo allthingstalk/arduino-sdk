@@ -1,6 +1,15 @@
 Arduino SDK
 ---
 
+### Version
+
+What's new?
+
+* Support for Binary payloads using our ABCL language
+* Support for CBOR messages
+* NodeMCU WiFi example (for both sensing and actuation)
+* Linkit One examples (basic and GPS example)
+
 ### Hardware
 
 This SDK is for Arduino and Arduino compatible boards, such as
@@ -106,6 +115,8 @@ Please note the minor board specific settings below.
 #### NodeMCU
 
 The example will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
+
+> Version 2.4.0 of the esp8266 library produces a conflict with the core Arduino library. We suggest installing/downgrading esp8266 version 2.3.0 in your boards manager.
 
 > Make sure you fill in your network credentials in the **setup()** method of the sketch
 ```
