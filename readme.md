@@ -1,7 +1,7 @@
 Arduino SDK
 ---
 
-### Version
+### Version v1.1
 
 What's new?
 
@@ -9,6 +9,7 @@ What's new?
 * Support for CBOR messages
 * NodeMCU WiFi example (for both sensing and actuation)
 * Linkit One examples (basic and GPS example)
+* Option to set device credentials **globally** or **locally**
 
 ### Hardware
 
