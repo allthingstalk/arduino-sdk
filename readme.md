@@ -117,7 +117,7 @@ Please note the minor board specific settings below.
 
 The example will show you how to send data from the NodeMCU to AllThingsTalk as well as the other way around, actuating the onboard LED from the cloud.
 
-> Version 2.4.0 of the esp8266 library produces a conflict with the core Arduino library. We suggest installing/downgrading esp8266 version 2.3.0 in your boards manager.
+> Version 2.4.0 of the esp8266 library produces a conflict. We suggest installing/downgrading to esp8266 version 2.3.0 in your boards manager.
 
 > Make sure you fill in your network credentials in the **setup()** method of the sketch
 ```

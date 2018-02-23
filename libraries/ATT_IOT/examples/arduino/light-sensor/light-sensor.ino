@@ -73,7 +73,7 @@ void loop()
     device.send(String(value), "Light");
     prevTime = curTime;
   }
-  Device.Process(); 
+  device.process(); 
 }
 
 
