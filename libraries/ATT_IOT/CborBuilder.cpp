@@ -206,7 +206,11 @@ void CborBuilder::writeTypeAndValue(uint8_t majorType, const uint64_t value)
 
 void CborBuilder::writeInt(const int value)
 {
-  writeTypeAndValue(0, (uint32_t)value);
+  if(value < 0) {
+    writeTypeAndValue(1, (uint32_t) -(value+1));
+  } else {
+    writeTypeAndValue(0, (uint32_t) value);
+  }
 }
 
 void CborBuilder::writeBytes(const unsigned char *data, const unsigned int size)
