@@ -52,7 +52,7 @@ void setup()
   Serial.begin(9600);  // Init serial link for debugging
   
   // Enter your WiFi credentials here!
-  setupWiFi("", "");
+  setupWiFi("your_ssid", "your_wifi_password");
   //
   
   while(!device.connect(&espClient, http))  // Connect to AllThingsTalk
