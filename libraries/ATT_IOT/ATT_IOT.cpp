@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-#define DEBUG  // turns on debugging in the IOT library. comment out this line to save memory.
+#define DEBUG 1 // Toggle debugging in the IOT library
 #define FAST_MQTT
 
 
@@ -30,7 +30,7 @@
 #define ETHERNETDELAY 1000  // the nr of milliseconds that we pause to give the ethernet board time to start
 #define MQTTPORT 1883
 
-#ifdef DEBUG
+#if DEBUG
 char HTTPSERVTEXT[] = "connection HTTP Server";
 char MQTTSERVTEXT[] = "connection MQTT Server";
 char FAILED_RETRY[] = " failed,retry";
@@ -63,21 +63,21 @@ bool ATTDevice::connect(Client* httpClient, const char httpServer[])
   _client = httpClient;
   _serverName = httpServer;  // keep track of this value while working with the http server
   
-  #ifdef DEBUG
+  #if DEBUG
   Serial.print("Connecting to ");
   Serial.println(httpServer);
   #endif
 
   if (!_client->connect(httpServer, 80))  // if you get a connection, report back via serial:
   {
-    #ifdef DEBUG
+    #if DEBUG
     Serial.print(HTTPSERVTEXT);
     Serial.println(FAILED_RETRY);
     #endif
     return false;  // we have created a connection succesfully
   }
   else{
-    #ifdef DEBUG
+    #if DEBUG
     Serial.print(HTTPSERVTEXT);
     Serial.println(SUCCESTXT);
     #endif
@@ -98,7 +98,7 @@ void ATTDevice::close()
 void ATTDevice::closeHTTP()
 {
   if(_client){
-    #ifdef DEBUG
+    #if DEBUG
     Serial.println(F("Stopping HTTP"));
     #endif
     _client->flush();
@@ -189,7 +189,7 @@ bool ATTDevice::subscribe(PubSubClient& mqttclient)
     return subscribe(mqttclient, _token.c_str());
   }
   else{
-    #ifdef DEBUG
+    #if DEBUG
     Serial.print(MQTTSERVTEXT);
     Serial.println("failed: invalid credentials");
     #endif
@@ -221,13 +221,13 @@ bool ATTDevice::mqttConnect()
   if(_mqttUserName && _mqttpwd){
     if (!_mqttclient->connect(mqttId, (char*)_mqttUserName, (char*)_mqttpwd)) 
     {
-      #ifdef DEBUG
+      #if DEBUG
       Serial.print(MQTTSERVTEXT);
       Serial.println(FAILED_RETRY);
       #endif
       return false;
     }
-    #ifdef DEBUG
+    #if DEBUG
     Serial.print(MQTTSERVTEXT);
     Serial.println(SUCCESTXT);
     #endif
@@ -235,7 +235,7 @@ bool ATTDevice::mqttConnect()
     return true;
   }
   else{
-    #ifdef DEBUG
+    #if DEBUG
     Serial.print(MQTTSERVTEXT);
     Serial.println("failed: invalid credentials");
     #endif
@@ -248,7 +248,7 @@ bool ATTDevice::process()
 {
   if(_mqttclient->connected() == false)
   {
-    #ifdef DEBUG  
+    #if DEBUG  
     Serial.println(F("Lost broker connection,restarting from process")); 
     #endif
     if(mqttConnect() == false)
@@ -283,15 +283,15 @@ void ATTDevice::send(String value, String asset)
 {
   if(_mqttclient->connected() == false)
   {
-    #ifdef DEBUG  
+    #if DEBUG  
     Serial.println(F("Lost broker connection,restarting from send")); 
     #endif
     mqttConnect();
   }
 
   char* message_buff = buildJsonContent(value);
-  
-  #ifdef DEBUG  // don't need to write all of this if not debugging
+
+  #if DEBUG  // don't need to write all of this if not debugging
   Serial.print(F("Publish to ")); Serial.print(asset); Serial.print(": "); Serial.println(message_buff);                                
   #endif
   
@@ -314,13 +314,13 @@ bool ATTDevice::sendBinary(void* packet, unsigned char size)
 {
     if(_mqttclient->connected() == false)
   {
-    #ifdef DEBUG  
+    #if DEBUG  
     Serial.println(F("Lost broker connection,restarting from send")); 
     #endif
     mqttConnect();
   }
   
-  #ifdef DEBUG  // don't need to write all of this if not debugging
+  #if DEBUG  // don't need to write all of this if not debugging
   Serial.print(F("Publish to "));
   // Print actual payload from binary buffer
   char hexTable[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -352,13 +352,13 @@ bool ATTDevice::sendCbor(unsigned char* data, unsigned int size)
 {
   if(_mqttclient->connected() == false)
   {
-    #ifdef DEBUG  
+    #if DEBUG  
     Serial.println(F("Lost broker connection,restarting from send")); 
     #endif
     mqttConnect();
   }
   
-  #ifdef DEBUG  // don't need to write all of this if not debugging
+  #if DEBUG  // don't need to write all of this if not debugging
   Serial.print(F("Publish to "));
   // Print actual payload from binary buffer
   char hexTable[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -396,7 +396,7 @@ void ATTDevice::mqttSubscribe()
     MqttString.toCharArray(Mqttstring_buff, MqttString.length()+1);
     _mqttclient->subscribe(Mqttstring_buff);
 
-  #ifdef DEBUG
+  #if DEBUG
     Serial.println("MQTT Client subscribed");
   #endif
 }
@@ -410,7 +410,7 @@ String ATTDevice::getAssetName(char* topic, int topicLength)
   {
     if(i==3)  // 3rd section of topic contains asset name "device/<deviceId>/asset/<assetName>/command"
     {
-      #ifdef DEBUG
+      #if DEBUG
         Serial.println(command);
       #endif
       return command;
@@ -428,11 +428,11 @@ void ATTDevice::getHTTPResult()
   if(_client->available()){
     while (_client->available()) {
       char c = _client->read();
-      #ifdef DEBUG
+      #if DEBUG
       Serial.print(c);
       #endif
     }
-    #ifdef DEBUG
+    #if DEBUG
     Serial.println();
     #endif
   }
