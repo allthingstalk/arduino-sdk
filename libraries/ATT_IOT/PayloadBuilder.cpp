@@ -24,14 +24,14 @@
 // initialize the payload buffer with the given maximum size
 PayloadBuilder::PayloadBuilder(ATTDevice &device, uint8_t size) : maxsize(size)
 {
-  buffer = (uint8_t*) malloc(size);
+  buffer = (uint8_t *)malloc(size);
   cursor = 0;
   _device = &device;
 }
 
 PayloadBuilder::PayloadBuilder(ATTDevice &device) : maxsize(60)
 {
-  buffer = (uint8_t*) malloc(60);
+  buffer = (uint8_t *)malloc(60);
   cursor = 0;
   _device = &device;
 }
@@ -54,18 +54,18 @@ uint8_t PayloadBuilder::getSize(void)
 }
 
 // return the payload buffer
-uint8_t* PayloadBuilder::getBuffer(void)
+uint8_t *PayloadBuilder::getBuffer(void)
 {
   return buffer;
 }
 
-uint8_t PayloadBuilder::copy(uint8_t* dst)
+uint8_t PayloadBuilder::copy(uint8_t *dst)
 {
   memcpy(dst, buffer, cursor);
   return cursor;
 }
 
-bool PayloadBuilder::send(void* packet, unsigned char size)
+bool PayloadBuilder::send(void *packet, unsigned char size)
 {
   return _device->sendBinary(packet, size);
 }
@@ -78,7 +78,8 @@ bool PayloadBuilder::send()
 
 uint8_t PayloadBuilder::addBoolean(uint8_t value)
 {
-  if ((cursor + ATTALK_BOOLEAN_SIZE) > maxsize) {
+  if ((cursor + ATTALK_BOOLEAN_SIZE) > maxsize)
+  {
     return 0;
   }
   buffer[cursor++] = value;
@@ -88,10 +89,11 @@ uint8_t PayloadBuilder::addBoolean(uint8_t value)
 
 uint8_t PayloadBuilder::addInteger(int value)
 {
-  if ((cursor + ATTALK_INTEGER_SIZE) > maxsize) {
+  if ((cursor + ATTALK_INTEGER_SIZE) > maxsize)
+  {
     return 0;
   }
-  byte* fb = (byte*) &value;
+  byte *fb = (byte *)&value;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
@@ -101,10 +103,11 @@ uint8_t PayloadBuilder::addInteger(int value)
 
 uint8_t PayloadBuilder::addNumber(float value)
 {
-  if ((cursor + ATTALK_NUMBER_SIZE) > maxsize) {
+  if ((cursor + ATTALK_NUMBER_SIZE) > maxsize)
+  {
     return 0;
   }
-  byte* fb = (byte*) &value;
+  byte *fb = (byte *)&value;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
@@ -116,60 +119,62 @@ uint8_t PayloadBuilder::addNumber(float value)
 
 uint8_t PayloadBuilder::addGPS(float latitude, float longitude, float altitude)
 {
-  if ((cursor + ATTALK_GPS_SIZE) > maxsize) {
+  if ((cursor + ATTALK_GPS_SIZE) > maxsize)
+  {
     return 0;
   }
 
-  byte* fb = (byte*) &latitude;
+  byte *fb = (byte *)&latitude;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
   buffer[cursor++] = fb[2];
   buffer[cursor++] = fb[3];
 
-  fb = (byte*) &longitude;
+  fb = (byte *)&longitude;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
   buffer[cursor++] = fb[2];
   buffer[cursor++] = fb[3];
 
-  fb = (byte*) &altitude;
+  fb = (byte *)&altitude;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
   buffer[cursor++] = fb[2];
   buffer[cursor++] = fb[3];
-  
+
   return cursor;
 }
 
 uint8_t PayloadBuilder::addAccelerometer(float x, float y, float z)
 {
-  if ((cursor + ATTALK_ACCEL_SIZE) > maxsize) {
+  if ((cursor + ATTALK_ACCEL_SIZE) > maxsize)
+  {
     return 0;
   }
 
-  byte* fb = (byte*) &x;
+  byte *fb = (byte *)&x;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
   buffer[cursor++] = fb[2];
   buffer[cursor++] = fb[3];
 
-  fb = (byte*) &y;
+  fb = (byte *)&y;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
   buffer[cursor++] = fb[2];
   buffer[cursor++] = fb[3];
 
-  fb = (byte*) &z;
+  fb = (byte *)&z;
 
   buffer[cursor++] = fb[0];
   buffer[cursor++] = fb[1];
   buffer[cursor++] = fb[2];
   buffer[cursor++] = fb[3];
-  
+
   return cursor;
 }
