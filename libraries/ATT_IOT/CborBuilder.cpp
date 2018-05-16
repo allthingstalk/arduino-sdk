@@ -35,7 +35,8 @@ CborBuilder::CborBuilder(ATTDevice &device, const uint32_t initialCapacity)
   init(initialCapacity);
 }
 
-CborBuilder::~CborBuilder() {
+CborBuilder::~CborBuilder()
+{
   delete buffer;
 }
 
@@ -60,7 +61,7 @@ bool CborBuilder::send()
 void CborBuilder::addBoolean(bool value, const String asset)
 {
   writeString(asset);
-  if(value)
+  if (value)
     writeSpecial(21);
   else
     writeSpecial(20);
@@ -93,27 +94,27 @@ void CborBuilder::addGps(double latitude, double longitude, double altitude, con
 // Convert double to byte array and add it to Cbor buffer
 void CborBuilder::addNumber(double value)
 {
-  const int size = sizeof(value);  // Size 4 or 8 for double
-  
+  const int size = sizeof(value); // Size 4 or 8 for double
+
   // Convert double to bytes array
   union {
     double a;
     unsigned char bytes[size];
   } thing;
-  
-  if(size==4)
+
+  if (size == 4)
     putByte(0xFA);
-  else if(size==8)
+  else if (size == 8)
     putByte(0xFB);
   else
-    return;  // Unknown float size
-  
+    return; // Unknown float size
+
   thing.a = value;
   int ii;
-  for (ii=(size-1); ii>=0; ii--)
+  for (ii = (size - 1); ii >= 0; ii--)
   {
     putByte(thing.bytes[ii]);
-  }  
+  }
 }
 
 void CborBuilder::addString(const String value, const String asset)
@@ -134,19 +135,25 @@ unsigned int CborBuilder::getSize()
 
 void CborBuilder::putByte(unsigned char value)
 {
-  if(offset < capacity) {
+  if (offset < capacity)
+  {
     buffer[offset++] = value;
-  } else {
+  }
+  else
+  {
     Serial.print("buffer overflow error");
   }
 }
 
 void CborBuilder::putBytes(const unsigned char *data, const unsigned int size)
 {
-  if(offset + size - 1 < capacity) {
+  if (offset + size - 1 < capacity)
+  {
     memcpy(buffer + offset, data, size);
     offset += size;
-  } else {
+  }
+  else
+  {
     Serial.print("buffer overflow error");
   }
 }
@@ -156,16 +163,23 @@ void CborBuilder::putBytes(const unsigned char *data, const unsigned int size)
 void CborBuilder::writeTypeAndValue(uint8_t majorType, const uint32_t value)
 {
   majorType <<= 5;
-  if(value < 24) {
+  if (value < 24)
+  {
     putByte(majorType | value);
-  } else if(value < 256) {
+  }
+  else if (value < 256)
+  {
     putByte(majorType | 24);
     putByte(value);
-  } else if(value < 65536) {
+  }
+  else if (value < 65536)
+  {
     putByte(majorType | 25);
     putByte(value >> 8);
     putByte(value);
-  } else {
+  }
+  else
+  {
     putByte(majorType | 26);
     putByte(value >> 24);
     putByte(value >> 16);
@@ -177,21 +191,30 @@ void CborBuilder::writeTypeAndValue(uint8_t majorType, const uint32_t value)
 void CborBuilder::writeTypeAndValue(uint8_t majorType, const uint64_t value)
 {
   majorType <<= 5;
-  if(value < 24ULL) {
+  if (value < 24ULL)
+  {
     putByte(majorType | value);
-  } else if(value < 256ULL) {
+  }
+  else if (value < 256ULL)
+  {
     putByte(majorType | 24);
     putByte(value);
-  } else if(value < 65536ULL) {
+  }
+  else if (value < 65536ULL)
+  {
     putByte(majorType | 25);
     putByte(value >> 8);
-  } else if(value < 4294967296ULL) {
+  }
+  else if (value < 4294967296ULL)
+  {
     putByte(majorType | 26);
     putByte(value >> 24);
     putByte(value >> 16);
     putByte(value >> 8);
     putByte(value);
-  } else {
+  }
+  else
+  {
     putByte(majorType | 27);
     putByte(value >> 56);
     putByte(value >> 48);
@@ -206,10 +229,13 @@ void CborBuilder::writeTypeAndValue(uint8_t majorType, const uint64_t value)
 
 void CborBuilder::writeInt(const int value)
 {
-  if(value < 0) {
-    writeTypeAndValue(1, (uint32_t) -(value+1));
-  } else {
-    writeTypeAndValue(0, (uint32_t) value);
+  if (value < 0)
+  {
+    writeTypeAndValue(1, (uint32_t) - (value + 1));
+  }
+  else
+  {
+    writeTypeAndValue(0, (uint32_t)value);
   }
 }
 
