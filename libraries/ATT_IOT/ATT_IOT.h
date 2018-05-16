@@ -100,9 +100,14 @@ public:
   bool sendCbor(unsigned char *data, unsigned int size);
 
 private:
-  String _serverName; // store the name of the http server that we should use
-  String _token;      // the client key provided by the user
-  Client *_client;    // raw http communication. Possible to save some memory here: pass the client as a param in connect, put the object local in the setup function
+  // store the name of the http server that we should use 
+  String _serverName;
+
+  // Device's token
+  String _token;
+
+  // raw http communication. Possible to save some memory here: pass the client as a param in connect, put the object local in the setup function    
+  Client *_client;
 
   const char *_mqttUserName; // we store a local copy of the the mqtt username and pwd, so we can auto reconnect if the connection was lost
   const char *_mqttpwd;

@@ -130,17 +130,18 @@ void ATTDevice::addAsset(String name, String title, String description, String a
   }
   _client->print(F("Host: "));
   _client->println(_serverName);
-  
+
   _client->println(F("Content-Type: application/json"));
-  
+
   _client->print(F("User-Agent: ATTalk-ArduinoSDK/"));
-  _client.println(F(VERSION));
-  
+  _client->println(F(VERSION));
+
   _client->print(F("Authorization: Bearer "));
   _client->println(_token);
 
   _client->print(F("Content-Length: "));
-  { //make every mem op local, so it is unloaded asap
+  {
+    //make every mem op local, so it is unloaded asap
     int length = title.length() + description.length() + dataType.length();
     if (assetType.equals("sensor"))
       length += 6;

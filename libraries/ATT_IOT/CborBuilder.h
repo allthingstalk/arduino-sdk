@@ -19,8 +19,8 @@
  * limitations under the License.
  */
 
-#ifndef CBOREN_H
-#define CBOREN_H
+#ifndef CBOR_BUILDER_H
+#define CBOR_BUILDER_H
 
 #include "Arduino.h"
 #include "ATT_IOT.h"
