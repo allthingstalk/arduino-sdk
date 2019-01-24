@@ -24,7 +24,6 @@
 
 
 #include "ATT_IOT.h"
-#include <keys.h>
 
 #define RETRYDELAY 5000     // the nr of milliseconds that we pause before retrying to create the connection
 #define ETHERNETDELAY 1000  // the nr of milliseconds that we pause to give the ethernet board time to start
@@ -38,11 +37,11 @@ char SUCCESTXT[] = " established";
 #endif
 
 //create the object
-ATTDevice::ATTDevice(): _client(NULL), _mqttclient(NULL)
-{
-  _deviceId = DEVICE_ID;
-  _token = DEVICE_TOKEN;
-}
+//ATTDevice::ATTDevice(): _client(NULL), _mqttclient(NULL)
+//{
+//  _deviceId = DEVICE_ID;
+//  _token = DEVICE_TOKEN;
+//}
 
 //create the object
 ATTDevice::ATTDevice(String deviceId, String deviceToken): _client(NULL), _mqttclient(NULL)
@@ -62,7 +61,7 @@ bool ATTDevice::connect(Client* httpClient, const char httpServer[])
 {
   _client = httpClient;
   _serverName = httpServer;  // keep track of this value while working with the http server
-  
+
   #if DEBUG
   Serial.print("Connecting to ");
   Serial.println(httpServer);
@@ -128,7 +127,7 @@ void ATTDevice::addAsset(String name, String title, String description, String a
     _client->println(_serverName);
     _client->println(F("Content-Type: application/json"));
     _client->print(F("Authorization: Bearer "));_client->println(_token);
-  
+
   _client->print(F("Content-Length: "));
   {                                          //make every mem op local, so it is unloaded asap
     int length = title.length() + description.length() + dataType.length();
@@ -140,7 +139,7 @@ void ATTDevice::addAsset(String name, String title, String description, String a
       length += 7;
      else if(assetType.equals("config"))
       length += 6;
-    
+
     if (dataType.length() == 0)
       length += 39;
     else if(dataType[0] == '{')
@@ -150,8 +149,8 @@ void ATTDevice::addAsset(String name, String title, String description, String a
     _client->println(length);
   }
     _client->println();
-    
-  _client->print(F("{\"title\":\"")); 
+
+  _client->print(F("{\"title\":\""));
   _client->print(title);
   _client->print(F("\",\"description\":\""));
   _client->print(description);
@@ -171,7 +170,7 @@ void ATTDevice::addAsset(String name, String title, String description, String a
   _client->print(F("}"));
   _client->println();
   _client->println();
-  
+
   unsigned long maxTime = millis() + 1000;
   while(millis() < maxTime)    //wait, but for the minimum amount of time.
   {
@@ -202,7 +201,7 @@ bool ATTDevice::subscribe(PubSubClient& mqttclient)
 // returns true when successful, false otherwise
 bool ATTDevice::subscribe(PubSubClient& mqttclient, const char* username)
 {
-  _mqttclient = &mqttclient;  
+  _mqttclient = &mqttclient;
   _serverName = "";  // no longer need this reference
   closeHTTP();  // close Http connection before opening Mqtt connection
   _mqttUserName = username;
@@ -219,7 +218,7 @@ bool ATTDevice::mqttConnect()
     _deviceId.toCharArray(mqttId, length);
   mqttId[length] = 0;
   if(_mqttUserName && _mqttpwd){
-    if (!_mqttclient->connect(mqttId, (char*)_mqttUserName, (char*)_mqttpwd)) 
+    if (!_mqttclient->connect(mqttId, (char*)_mqttUserName, (char*)_mqttpwd))
     {
       #if DEBUG
       Serial.print(MQTTSERVTEXT);
@@ -248,8 +247,8 @@ bool ATTDevice::process()
 {
   if(_mqttclient->connected() == false)
   {
-    #if DEBUG  
-    Serial.println(F("Lost broker connection,restarting from process")); 
+    #if DEBUG
+    Serial.println(F("Lost broker connection,restarting from process"));
     #endif
     if(mqttConnect() == false)
       return false;
@@ -283,8 +282,8 @@ void ATTDevice::send(String value, String asset)
 {
   if(_mqttclient->connected() == false)
   {
-    #if DEBUG  
-    Serial.println(F("Lost broker connection,restarting from send")); 
+    #if DEBUG
+    Serial.println(F("Lost broker connection,restarting from send"));
     #endif
     mqttConnect();
   }
@@ -292,9 +291,9 @@ void ATTDevice::send(String value, String asset)
   char* message_buff = buildJsonContent(value);
 
   #if DEBUG  // don't need to write all of this if not debugging
-  Serial.print(F("Publish to ")); Serial.print(asset); Serial.print(": "); Serial.println(message_buff);                                
+  Serial.print(F("Publish to ")); Serial.print(asset); Serial.print(": "); Serial.println(message_buff);
   #endif
-  
+
   char* Mqttstring_buff;
   {
     int length = _deviceId.length() + 21 + asset.length();  // 21 fixed chars + deviceId + assetName
@@ -304,7 +303,7 @@ void ATTDevice::send(String value, String asset)
   }
   _mqttclient->publish(Mqttstring_buff, message_buff);
   #ifndef FAST_MQTT  // some boards like the old arduino ethernet need a little time after sending mqtt data, other boards don't.
-  delay(100);        // give some time to the ethernet shield so it can process everything.       
+  delay(100);        // give some time to the ethernet shield so it can process everything.
   #endif
   delete(message_buff);
   delete(Mqttstring_buff);
@@ -314,12 +313,12 @@ bool ATTDevice::sendBinary(void* packet, unsigned char size)
 {
     if(_mqttclient->connected() == false)
   {
-    #if DEBUG  
-    Serial.println(F("Lost broker connection,restarting from send")); 
+    #if DEBUG
+    Serial.println(F("Lost broker connection,restarting from send"));
     #endif
     mqttConnect();
   }
-  
+
   #if DEBUG  // don't need to write all of this if not debugging
   Serial.print(F("Publish to "));
   // Print actual payload from binary buffer
@@ -331,20 +330,20 @@ bool ATTDevice::sendBinary(void* packet, unsigned char size)
 	}
   Serial.println();
   #endif
-  
+
   char* Mqttstring_buff;
   {
     int length = _deviceId.length() + 14;  // 14 fixed chars + deviceId
     Mqttstring_buff = new char[length];
-    sprintf(Mqttstring_buff, "device/%s/state", _deviceId.c_str());      
+    sprintf(Mqttstring_buff, "device/%s/state", _deviceId.c_str());
     Mqttstring_buff[length-1] = 0;
   }
   _mqttclient->publish(Mqttstring_buff, (unsigned char*)packet, size);
   #ifndef FAST_MQTT  // some boards like the old arduino ethernet need a little time after sending mqtt data, other boards don't.
-  delay(100);        // give some time to the ethernet shield so it can process everything.       
+  delay(100);        // give some time to the ethernet shield so it can process everything.
   #endif
-  delete(Mqttstring_buff);  
-  
+  delete(Mqttstring_buff);
+
   return true;
 }
 
@@ -352,12 +351,12 @@ bool ATTDevice::sendCbor(unsigned char* data, unsigned int size)
 {
   if(_mqttclient->connected() == false)
   {
-    #if DEBUG  
-    Serial.println(F("Lost broker connection,restarting from send")); 
+    #if DEBUG
+    Serial.println(F("Lost broker connection,restarting from send"));
     #endif
     mqttConnect();
   }
-  
+
   #if DEBUG  // don't need to write all of this if not debugging
   Serial.print(F("Publish to "));
   // Print actual payload from binary buffer
@@ -369,17 +368,17 @@ bool ATTDevice::sendCbor(unsigned char* data, unsigned int size)
 	}
   Serial.println();
   #endif
-  
+
   char* Mqttstring_buff;
   {
     int length = _deviceId.length() + 14;  // 14 fixed chars + deviceId
     Mqttstring_buff = new char[length];
-    sprintf(Mqttstring_buff, "device/%s/state", _deviceId.c_str());      
+    sprintf(Mqttstring_buff, "device/%s/state", _deviceId.c_str());
     Mqttstring_buff[length-1] = 0;
   }
   _mqttclient->publish(Mqttstring_buff, data, size);
   #ifndef FAST_MQTT  // some boards like the old arduino ethernet need a little time after sending mqtt data, other boards don't.
-  delay(100);        // give some time to the ethernet shield so it can process everything.       
+  delay(100);        // give some time to the ethernet shield so it can process everything.
   #endif
   delete(Mqttstring_buff);
 
