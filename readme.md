@@ -1,6 +1,6 @@
-Arduino SDK
----
 
+## This SDK is deprecated! [Upgrade to AllThingsTalk Arduino WiFi SDK v2](https://github.com/allthingstalk/arduino-wifi-sdk)
+  
 ### Version v1.1
 
 What's new?
